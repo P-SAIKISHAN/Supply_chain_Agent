@@ -331,6 +331,76 @@
   gap: 0.85rem;
 }
 
+.scenario-card--active {
+  border-color: rgba(95, 182, 255, 0.36);
+}
+
+.scenario-card__actions {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.spr-layout {
+  grid-template-columns: 0.95fr 1.05fr;
+}
+
+.spr-results {
+  display: grid;
+  gap: 1rem;
+}
+
+.spr-schedule-table {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.spr-table {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.spr-table__head,
+.spr-table__row {
+  display: grid;
+  grid-template-columns: 0.7fr 1fr 1fr 1.4fr;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.8rem 0.95rem;
+  border-radius: 14px;
+}
+
+.spr-table__head {
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: rgba(95, 182, 255, 0.05);
+}
+
+.spr-table__row {
+  background: rgba(5, 16, 30, 0.55);
+  border: 1px solid rgba(141, 180, 226, 0.12);
+}
+
+.note-list {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.95rem;
+}
+
+.note-list__header {
+  margin-top: 0.35rem;
+}
+
+.note-item {
+  padding: 0.8rem 0.9rem;
+  border-radius: 14px;
+  background: rgba(95, 182, 255, 0.05);
+  border: 1px solid rgba(95, 182, 255, 0.12);
+  color: rgba(230, 240, 255, 0.92);
+}
+
 .alert-card--critical {
   border-color: rgba(255, 107, 122, 0.2);
 }
@@ -514,5 +584,14 @@
 
   .ranking-metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .spr-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .spr-table__head,
+  .spr-table__row {
+    grid-template-columns: 1fr;
   }
 }

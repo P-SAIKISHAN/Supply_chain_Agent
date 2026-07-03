@@ -37,15 +37,15 @@
         <div>
           <p class="eyebrow">Strategic Petroleum Reserve</p>
           <h1>Reserve drawdown optimization</h1>
-          <p class="subtitle">Use heuristics and demand assumptions to plan a defensible release schedule.</p>
+          <p class="subtitle">Trigger plans by scenario or custom assumptions and track release schedules in one place.</p>
         </div>
         <div class="topbar__actions">
-          <button class="btn btn-secondary" type="button">Load scenario</button>
-          <button class="btn btn-primary" type="button">Optimize plan</button>
+          <button class="btn btn-secondary" type="button" data-spr-refresh>Refresh plans</button>
+          <button class="btn btn-primary" type="button" data-spr-optimize>Optimize plan</button>
         </div>
       </header>
 
-      <main class="page-content page-content--split">
+      <main class="page-content spr-layout">
         <section class="panel">
           <div class="panel__header">
             <div>
@@ -54,63 +54,119 @@
             </div>
             <span class="badge">Heuristic planner</span>
           </div>
-          <div class="form-grid">
+
+          <form id="spr-form" class="form-grid">
+            <label class="field">
+              <span>Target scope</span>
+              <select id="spr-scope">
+                <option value="national">Current live risk</option>
+                <option value="scenario">By scenario</option>
+                <option value="refinery">By refinery</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Scenario ID</span>
+              <input id="spr-scenario-id" type="number" min="1" placeholder="e.g. 1" />
+            </label>
+            <label class="field">
+              <span>Refinery ID</span>
+              <input id="spr-refinery-id" type="number" min="1" placeholder="e.g. 1" />
+            </label>
             <label class="field">
               <span>Scenario supply loss %</span>
-              <input type="number" value="11.6" />
+              <input id="spr-supply-loss" type="number" min="0" max="100" value="11.6" />
             </label>
             <label class="field">
               <span>Current reserve days cover</span>
-              <input type="number" value="21" />
+              <input id="spr-reserve-cover" type="number" min="0" max="365" value="21" />
             </label>
             <label class="field">
               <span>Disruption duration days</span>
-              <input type="number" value="14" />
+              <input id="spr-duration" type="number" min="1" max="365" value="14" />
             </label>
             <label class="field">
               <span>Import recovery days</span>
-              <input type="number" value="21" />
+              <input id="spr-recovery" type="number" min="1" max="365" value="21" />
             </label>
             <label class="field">
               <span>Replenishment window days</span>
-              <input type="number" value="45" />
+              <input id="spr-replenishment-window" type="number" min="1" max="365" value="45" />
             </label>
-            <label class="field field--inline">
-              <input type="checkbox" checked />
+            <label class="field field--full field--inline">
+              <input id="spr-reserve-allowed" type="checkbox" checked />
               <span>Reserve usage allowed</span>
             </label>
+          </form>
+
+          <div class="panel__divider"></div>
+          <div class="score-formula">
+            Heuristic uses scenario supply loss, reserve cover, duration, recovery window, and replenishment timing to estimate a release plan.
           </div>
         </section>
 
-        <section class="panel">
-          <div class="panel__header">
-            <div>
-              <p class="eyebrow">Proposed plan</p>
-              <h2>Release and replenishment</h2>
+        <section class="spr-results">
+          <div class="panel">
+            <div class="panel__header">
+              <div>
+                <p class="eyebrow">Proposed plan</p>
+                <h2>Release and replenishment</h2>
+              </div>
+              <span class="badge badge--warning" id="spr-plan-badge">Loading</span>
             </div>
-            <span class="badge badge--warning">Policy notes included</span>
+
+            <div class="result-block">
+              <div class="result-block__metric">
+                <span>Total drawdown barrels</span>
+                <strong id="spr-total-drawdown">--</strong>
+              </div>
+              <div class="result-block__metric">
+                <span>Drawdown days</span>
+                <strong id="spr-drawdown-days">--</strong>
+              </div>
+              <div class="result-block__metric">
+                <span>Daily release</span>
+                <strong id="spr-daily-release">--</strong>
+              </div>
+            </div>
+
+            <div class="dashboard-chart-wrap dashboard-chart-wrap--tall">
+              <canvas id="spr-release-chart" class="chart-canvas" height="300"></canvas>
+            </div>
+
+            <div class="panel__divider"></div>
+            <div id="spr-schedule-table" class="spr-schedule-table"></div>
           </div>
-          <div class="result-block">
-            <div class="result-block__metric">
-              <span>Total drawdown</span>
-              <strong>8.2M bbl</strong>
+
+          <div class="panel">
+            <div class="panel__header">
+              <div>
+                <p class="eyebrow">Allocation and strategy</p>
+                <h2>Refinery allocation suggestion</h2>
+              </div>
+              <span class="badge">Plan detail</span>
             </div>
-            <div class="result-block__metric">
-              <span>Drawdown days</span>
-              <strong>14</strong>
+
+            <div id="spr-allocation-list" class="stack-list"></div>
+
+            <div class="panel__divider"></div>
+
+            <div class="mini-table">
+              <div class="mini-table__row"><span>Replenishment strategy</span><strong id="spr-replenishment">--</strong></div>
+              <div class="mini-table__row"><span>Policy notes</span><strong id="spr-policy-notes">--</strong></div>
             </div>
-            <div class="result-block__metric">
-              <span>Daily release</span>
-              <strong>0.45M bbl</strong>
-            </div>
+
+            <div id="spr-risk-notes" class="note-list"></div>
           </div>
-          <div class="chart-placeholder chart-placeholder--tall">
-            <div class="chart-placeholder__label">Daily release schedule</div>
-          </div>
-          <div class="mini-table">
-            <div class="mini-table__row"><span>Refinery allocation</span><strong>Jamnagar, Paradip, Kochi</strong></div>
-            <div class="mini-table__row"><span>Replenishment strategy</span><strong>Phased top-up</strong></div>
-            <div class="mini-table__row"><span>Risk note</span><strong>Review daily if supply loss exceeds 40%</strong></div>
+
+          <div class="panel panel--wide">
+            <div class="panel__header">
+              <div>
+                <p class="eyebrow">Plan history</p>
+                <h2>Previously generated plans</h2>
+              </div>
+              <span class="badge badge--success" id="spr-plan-count">Loading</span>
+            </div>
+            <div id="spr-plan-list" class="scenario-list"></div>
           </div>
         </section>
       </main>
@@ -119,6 +175,7 @@
 
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/spr.js"></script>
 </body>
 </html>
 
