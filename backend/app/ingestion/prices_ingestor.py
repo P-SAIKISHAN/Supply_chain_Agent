@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.ingestion.base import BaseIngestor, upsert_row
 from app.ingestion.sample_data import price_items
 from app.models.commodity_price import CommodityPrice
+from app.providers.registry import get_price_provider
 
 
 class PricesIngestor(BaseIngestor):
@@ -15,7 +16,13 @@ class PricesIngestor(BaseIngestor):
     source_name = "prices"
 
     def fetch(self) -> list[dict[str, Any]]:
-        return price_items()
+        provider = get_price_provider(demo_mode=self.demo_mode)
+        try:
+            records = provider.fetch()
+            return records or price_items()
+        except Exception as exc:  # pragma: no cover - provider fallback
+            self.logger.warning("price_provider_failed", extra={"error": str(exc)})
+            return price_items()
 
     def normalize(self, records: list[dict[str, Any]]) -> list[dict[str, Any]]:
         normalized: list[dict[str, Any]] = []
@@ -49,4 +56,3 @@ class PricesIngestor(BaseIngestor):
             extra={"created": created, "updated": updated, "records": len(records)},
         )
         return {"upserted_count": len(records), "created_count": created, "updated_count": updated}
-

@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     redis_url: str = Field(default="redis://localhost:6379/0")
     enable_scheduler: bool = Field(default=False)
     scheduler_interval_minutes: int = Field(default=30)
+    demo_mode: bool = Field(default=True)
 
     cors_origins: list[str] = Field(
         default_factory=lambda: [
@@ -36,6 +37,44 @@ class Settings(BaseSettings):
     docs_url: str = Field(default="/docs")
     redoc_url: str = Field(default="/redoc")
     openapi_url: str = Field(default="/openapi.json")
+
+    llm_provider: str = Field(default="gemini")
+    llm_model: str = Field(default="gpt-4o-mini")
+    gemini_api_key: str = Field(default="")
+    gemini_base_url: str = Field(default="https://generativelanguage.googleapis.com/v1beta")
+    gemini_model: str = Field(default="gemini-1.5-flash")
+    groq_api_key: str = Field(default="")
+    groq_base_url: str = Field(default="https://api.groq.com/openai/v1")
+
+    gdelt_enabled: bool = Field(default=True)
+    gdelt_base_url: str = Field(default="https://api.gdeltproject.org/api/v2")
+    newsapi_enabled: bool = Field(default=False)
+    newsapi_api_key: str = Field(default="")
+    newsapi_base_url: str = Field(default="https://newsapi.org/v2")
+    event_registry_enabled: bool = Field(default=False)
+    event_registry_api_key: str = Field(default="")
+
+    ofac_enabled: bool = Field(default=True)
+    ofac_base_url: str = Field(default="https://sanctionssearch.ofac.treas.gov")
+    uk_sanctions_enabled: bool = Field(default=False)
+    eu_sanctions_enabled: bool = Field(default=False)
+    un_sanctions_enabled: bool = Field(default=False)
+
+    ais_provider: str = Field(default="mock")
+    marinetraffic_api_key: str = Field(default="")
+    marinetraffic_base_url: str = Field(default="https://services.marinetraffic.com/api")
+    vesselfinder_api_key: str = Field(default="")
+    vesselfinder_base_url: str = Field(default="https://api.vesselfinder.com")
+    datalastic_api_key: str = Field(default="")
+    datalastic_base_url: str = Field(default="https://api.datalastic.com/api/v0")
+
+    price_provider: str = Field(default="mock")
+    alphavantage_api_key: str = Field(default="")
+    alphavantage_base_url: str = Field(default="https://www.alphavantage.co/query")
+    eia_api_key: str = Field(default="")
+    eia_base_url: str = Field(default="https://api.eia.gov/v2")
+    crudeprice_api_key: str = Field(default="")
+    crudeprice_base_url: str = Field(default="https://www.crudepriceapi.com/api")
 
     class Config:
         env_file = ".env"
@@ -57,6 +96,27 @@ class Settings(BaseSettings):
 
     @validator("enable_scheduler", pre=True)
     def parse_enable_scheduler(cls, value: Any) -> bool:
+        if isinstance(value, bool):
+            return value
+        if value is None:
+            return False
+        if isinstance(value, str):
+            return value.strip().lower() in {"1", "true", "yes", "on"}
+        return bool(value)
+
+    @validator(
+        "debug",
+        "demo_mode",
+        "gdelt_enabled",
+        "newsapi_enabled",
+        "event_registry_enabled",
+        "ofac_enabled",
+        "uk_sanctions_enabled",
+        "eu_sanctions_enabled",
+        "un_sanctions_enabled",
+        pre=True,
+    )
+    def parse_flags(cls, value: Any) -> bool:
         if isinstance(value, bool):
             return value
         if value is None:

@@ -11,6 +11,7 @@ from app.models.risk_score import RiskScore
 from app.models.shipment import Shipment
 from app.models.shipping_corridor import ShippingCorridor
 from app.models.supplier_country import SupplierCountry
+from app.providers.registry import get_ais_provider
 
 
 class AISIngestor(BaseIngestor):
@@ -19,7 +20,13 @@ class AISIngestor(BaseIngestor):
     source_name = "ais"
 
     def fetch(self) -> list[dict[str, Any]]:
-        return ais_items()
+        provider = get_ais_provider(demo_mode=self.demo_mode)
+        try:
+            records = provider.fetch()
+            return records or ais_items()
+        except Exception as exc:  # pragma: no cover - provider fallback
+            self.logger.warning("ais_provider_failed", extra={"error": str(exc)})
+            return ais_items()
 
     def normalize(self, records: list[dict[str, Any]]) -> list[dict[str, Any]]:
         normalized: list[dict[str, Any]] = []
@@ -111,4 +118,3 @@ class AISIngestor(BaseIngestor):
             "updated_count": updated,
             "skipped_count": skipped,
         }
-
