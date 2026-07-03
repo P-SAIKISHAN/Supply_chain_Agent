@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <title>SPR | Energy Resilience Platform</title>
+  <link rel="stylesheet" href="../assets/css/main.css" />
+  <link rel="stylesheet" href="../assets/css/components.css" />
+</head>
+<body class="app-page">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar__brand">
+        <div class="brand-mark">ER</div>
+        <div>
+          <p class="brand-kicker">Energy Resilience</p>
+          <h2>SPR Optimizer</h2>
+        </div>
+      </div>
+      <nav class="sidebar__nav">
+        <a class="nav-link" href="./dashboard.html">Dashboard</a>
+        <a class="nav-link" href="./scenarios.html">Scenarios</a>
+        <a class="nav-link" href="./procurement.html">Procurement</a>
+        <a class="nav-link nav-link--active" href="./spr.html" aria-current="page">SPR</a>
+        <a class="nav-link" href="./map.html">Map</a>
+        <a class="nav-link" href="./admin.html">Admin</a>
+      </nav>
+      <div class="sidebar__footer">
+        <span class="status-badge status-badge--live">Reserve planning</span>
+        <p>Translate disruption estimates into transparent drawdown plans.</p>
+      </div>
+    </aside>
+
+    <div class="main-column">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Strategic Petroleum Reserve</p>
+          <h1>Reserve drawdown optimization</h1>
+          <p class="subtitle">Use heuristics and demand assumptions to plan a defensible release schedule.</p>
+        </div>
+        <div class="topbar__actions">
+          <button class="btn btn-secondary" type="button">Load scenario</button>
+          <button class="btn btn-primary" type="button">Optimize plan</button>
+        </div>
+      </header>
+
+      <main class="page-content page-content--split">
+        <section class="panel">
+          <div class="panel__header">
+            <div>
+              <p class="eyebrow">Optimization inputs</p>
+              <h2>Reserve assumptions</h2>
+            </div>
+            <span class="badge">Heuristic planner</span>
+          </div>
+          <div class="form-grid">
+            <label class="field">
+              <span>Scenario supply loss %</span>
+              <input type="number" value="11.6" />
+            </label>
+            <label class="field">
+              <span>Current reserve days cover</span>
+              <input type="number" value="21" />
+            </label>
+            <label class="field">
+              <span>Disruption duration days</span>
+              <input type="number" value="14" />
+            </label>
+            <label class="field">
+              <span>Import recovery days</span>
+              <input type="number" value="21" />
+            </label>
+            <label class="field">
+              <span>Replenishment window days</span>
+              <input type="number" value="45" />
+            </label>
+            <label class="field field--inline">
+              <input type="checkbox" checked />
+              <span>Reserve usage allowed</span>
+            </label>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel__header">
+            <div>
+              <p class="eyebrow">Proposed plan</p>
+              <h2>Release and replenishment</h2>
+            </div>
+            <span class="badge badge--warning">Policy notes included</span>
+          </div>
+          <div class="result-block">
+            <div class="result-block__metric">
+              <span>Total drawdown</span>
+              <strong>8.2M bbl</strong>
+            </div>
+            <div class="result-block__metric">
+              <span>Drawdown days</span>
+              <strong>14</strong>
+            </div>
+            <div class="result-block__metric">
+              <span>Daily release</span>
+              <strong>0.45M bbl</strong>
+            </div>
+          </div>
+          <div class="chart-placeholder chart-placeholder--tall">
+            <div class="chart-placeholder__label">Daily release schedule</div>
+          </div>
+          <div class="mini-table">
+            <div class="mini-table__row"><span>Refinery allocation</span><strong>Jamnagar, Paradip, Kochi</strong></div>
+            <div class="mini-table__row"><span>Replenishment strategy</span><strong>Phased top-up</strong></div>
+            <div class="mini-table__row"><span>Risk note</span><strong>Review daily if supply loss exceeds 40%</strong></div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+</body>
+</html>
+

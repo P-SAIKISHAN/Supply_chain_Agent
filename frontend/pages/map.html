@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <title>Map | Energy Resilience Platform</title>
+  <link rel="stylesheet" href="../assets/css/main.css" />
+  <link rel="stylesheet" href="../assets/css/components.css" />
+</head>
+<body class="app-page">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar__brand">
+        <div class="brand-mark">ER</div>
+        <div>
+          <p class="brand-kicker">Energy Resilience</p>
+          <h2>Digital Twin</h2>
+        </div>
+      </div>
+      <nav class="sidebar__nav">
+        <a class="nav-link" href="./dashboard.html">Dashboard</a>
+        <a class="nav-link" href="./scenarios.html">Scenarios</a>
+        <a class="nav-link" href="./procurement.html">Procurement</a>
+        <a class="nav-link" href="./spr.html">SPR</a>
+        <a class="nav-link nav-link--active" href="./map.html" aria-current="page">Map</a>
+        <a class="nav-link" href="./admin.html">Admin</a>
+      </nav>
+      <div class="sidebar__footer">
+        <span class="status-badge status-badge--live">Geospatial view</span>
+        <p>Render suppliers, corridors, ports, refineries, and hotspots.</p>
+      </div>
+    </aside>
+
+    <div class="main-column">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Geospatial digital twin</p>
+          <h1>Network map</h1>
+          <p class="subtitle">Designed for Leaflet or Mapbox layers with risk overlays and disruption markers.</p>
+        </div>
+        <div class="topbar__actions">
+          <button class="btn btn-secondary" type="button">Toggle layers</button>
+          <button class="btn btn-primary" type="button">Refresh map</button>
+        </div>
+      </header>
+
+      <main class="page-content page-content--map">
+        <section class="panel panel--map">
+          <div class="panel__header">
+            <div>
+              <p class="eyebrow">Map canvas</p>
+              <h2>Corridors and nodes</h2>
+            </div>
+            <span class="badge">GeoJSON ready</span>
+          </div>
+          <div class="map-canvas">
+            <div class="map-canvas__overlay">
+              <span>Map render area</span>
+              <strong>Supplier countries, shipping corridors, ports, refineries, shipments</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel__header">
+            <div>
+              <p class="eyebrow">Legend</p>
+              <h2>Layers and hotspots</h2>
+            </div>
+            <span class="badge badge--critical">High risk zones</span>
+          </div>
+          <div class="legend-list">
+            <div class="legend-item"><span class="legend-swatch legend-swatch--corridor"></span> Shipping corridor</div>
+            <div class="legend-item"><span class="legend-swatch legend-swatch--refinery"></span> Refinery</div>
+            <div class="legend-item"><span class="legend-swatch legend-swatch--port"></span> Port</div>
+            <div class="legend-item"><span class="legend-swatch legend-swatch--shipment"></span> Shipment</div>
+          </div>
+          <div class="hotspot-list">
+            <article class="hotspot-card">
+              <strong>Strait of Hormuz</strong>
+              <p>Critical route exposure and active navigation alert.</p>
+            </article>
+            <article class="hotspot-card">
+              <strong>Red Sea</strong>
+              <p>Recurring attack risk and route diversion pressure.</p>
+            </article>
+            <article class="hotspot-card">
+              <strong>Vadinar / Jamnagar cluster</strong>
+              <p>Refinery concentration increases near-term operational sensitivity.</p>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+</body>
+</html>
+

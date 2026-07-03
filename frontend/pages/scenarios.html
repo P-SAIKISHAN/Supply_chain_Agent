@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <title>Scenarios | Energy Resilience Platform</title>
+  <link rel="stylesheet" href="../assets/css/main.css" />
+  <link rel="stylesheet" href="../assets/css/components.css" />
+</head>
+<body class="app-page">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar__brand">
+        <div class="brand-mark">ER</div>
+        <div>
+          <p class="brand-kicker">Energy Resilience</p>
+          <h2>Scenario Lab</h2>
+        </div>
+      </div>
+      <nav class="sidebar__nav">
+        <a class="nav-link" href="./dashboard.html">Dashboard</a>
+        <a class="nav-link nav-link--active" href="./scenarios.html" aria-current="page">Scenarios</a>
+        <a class="nav-link" href="./procurement.html">Procurement</a>
+        <a class="nav-link" href="./spr.html">SPR</a>
+        <a class="nav-link" href="./map.html">Map</a>
+        <a class="nav-link" href="./admin.html">Admin</a>
+      </nav>
+      <div class="sidebar__footer">
+        <span class="status-badge status-badge--live">Scenario modeling</span>
+        <p>Create, run, and review disruption simulations.</p>
+      </div>
+    </aside>
+
+    <div class="main-column">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Scenario designer</p>
+          <h1>Disruption simulation</h1>
+          <p class="subtitle">Model chokepoint closures, sanctions escalation, production cuts, and compound events.</p>
+        </div>
+        <div class="topbar__actions">
+          <button class="btn btn-secondary" type="button">Save draft</button>
+          <button class="btn btn-primary" type="button">Run scenario</button>
+        </div>
+      </header>
+
+      <main class="page-content page-content--split">
+        <section class="panel">
+          <div class="panel__header">
+            <div>
+              <p class="eyebrow">Build scenario</p>
+              <h2>Assumption controls</h2>
+            </div>
+            <span class="badge">Heuristic model</span>
+          </div>
+          <div class="form-grid">
+            <label class="field">
+              <span>Scenario name</span>
+              <input type="text" value="Hormuz closure - 14 day disruption" />
+            </label>
+            <label class="field">
+              <span>Scenario type</span>
+              <select>
+                <option>Chokepoint closure</option>
+                <option>Sanctions escalation</option>
+                <option>Production cut</option>
+                <option>Refinery outage</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Impacted corridors</span>
+              <input type="text" value="Strait of Hormuz, Red Sea" />
+            </label>
+            <label class="field">
+              <span>Impacted suppliers</span>
+              <input type="text" value="Saudi Arabia, Iraq" />
+            </label>
+            <label class="field">
+              <span>Duration days</span>
+              <input type="number" value="14" />
+            </label>
+            <label class="field">
+              <span>Disruption severity %</span>
+              <input type="number" value="35" />
+            </label>
+            <label class="field">
+              <span>Price shock %</span>
+              <input type="number" value="18" />
+            </label>
+            <label class="field">
+              <span>Tanker delay days</span>
+              <input type="number" value="6" />
+            </label>
+            <label class="field field--full">
+              <span>Trigger description</span>
+              <textarea rows="4">Temporary closure of the Strait of Hormuz with Red Sea spillover effects.</textarea>
+            </label>
+            <label class="field field--full field--inline">
+              <input type="checkbox" checked />
+              <span>Reserve usage allowed</span>
+            </label>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel__header">
+            <div>
+              <p class="eyebrow">Scenario library</p>
+              <h2>Saved disruptions</h2>
+            </div>
+            <span class="badge badge--success">2 ready</span>
+          </div>
+          <div class="scenario-list">
+            <article class="scenario-card">
+              <div class="scenario-card__head">
+                <strong>Hormuz closure - 14 day disruption</strong>
+                <span class="pill pill--critical">Critical</span>
+              </div>
+              <p>Short, severe choke point closure with tactical reserve drawdown.</p>
+            </article>
+            <article class="scenario-card">
+              <div class="scenario-card__head">
+                <strong>Red Sea escalation + sanctions tightening</strong>
+                <span class="pill pill--high">High</span>
+              </div>
+              <p>Compound route and compliance shock affecting tanker optionality.</p>
+            </article>
+          </div>
+
+          <div class="panel__divider"></div>
+
+          <div class="result-block">
+            <div class="result-block__metric">
+              <span>Supply loss</span>
+              <strong>11.6%</strong>
+            </div>
+            <div class="result-block__metric">
+              <span>Fuel price impact</span>
+              <strong>18.4%</strong>
+            </div>
+            <div class="result-block__metric">
+              <span>Mitigation urgency</span>
+              <strong>High</strong>
+            </div>
+          </div>
+          <div class="chart-placeholder chart-placeholder--tall">
+            <div class="chart-placeholder__label">Scenario impact output</div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+</body>
+</html>
+

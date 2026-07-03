@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <title>Procurement | Energy Resilience Platform</title>
+  <link rel="stylesheet" href="../assets/css/main.css" />
+  <link rel="stylesheet" href="../assets/css/components.css" />
+</head>
+<body class="app-page">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar__brand">
+        <div class="brand-mark">ER</div>
+        <div>
+          <p class="brand-kicker">Energy Resilience</p>
+          <h2>Procurement</h2>
+        </div>
+      </div>
+      <nav class="sidebar__nav">
+        <a class="nav-link" href="./dashboard.html">Dashboard</a>
+        <a class="nav-link" href="./scenarios.html">Scenarios</a>
+        <a class="nav-link nav-link--active" href="./procurement.html" aria-current="page">Procurement</a>
+        <a class="nav-link" href="./spr.html">SPR</a>
+        <a class="nav-link" href="./map.html">Map</a>
+        <a class="nav-link" href="./admin.html">Admin</a>
+      </nav>
+      <div class="sidebar__footer">
+        <span class="status-badge status-badge--live">Recommendation engine</span>
+        <p>Rank supplier and route combinations by weighted risk and feasibility.</p>
+      </div>
+    </aside>
+
+    <div class="main-column">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Procurement orchestrator</p>
+          <h1>Alternate supply planning</h1>
+          <p class="subtitle">Compare route risk, crude compatibility, cost, delivery, and sanctions safety.</p>
+        </div>
+        <div class="topbar__actions">
+          <button class="btn btn-secondary" type="button">Filter</button>
+          <button class="btn btn-primary" type="button">Generate ranking</button>
+        </div>
+      </header>
+
+      <main class="page-content page-content--split">
+        <section class="panel">
+          <div class="panel__header">
+            <div>
+              <p class="eyebrow">Recommendation settings</p>
+              <h2>Scope and constraints</h2>
+            </div>
+            <span class="badge">Weighted score</span>
+          </div>
+          <div class="form-grid">
+            <label class="field">
+              <span>Target scope</span>
+              <select>
+                <option>National</option>
+                <option>Refinery</option>
+                <option>Scenario</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Refinery</span>
+              <input type="text" value="Jamnagar Refinery" />
+            </label>
+            <label class="field">
+              <span>Scenario</span>
+              <input type="text" value="Hormuz closure - 14 day disruption" />
+            </label>
+            <label class="field">
+              <span>Top recommendations</span>
+              <input type="number" value="5" />
+            </label>
+            <label class="field">
+              <span>Candidate suppliers limit</span>
+              <input type="number" value="8" />
+            </label>
+            <label class="field">
+              <span>Candidate corridors limit</span>
+              <input type="number" value="3" />
+            </label>
+          </div>
+
+          <div class="panel__divider"></div>
+          <div class="score-formula">
+            overall_score = 0.30 route risk inverse + 0.25 crude compatibility + 0.20 cost efficiency + 0.15 delivery feasibility + 0.10 sanctions safety
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel__header">
+            <div>
+              <p class="eyebrow">Top ranked options</p>
+              <h2>Executable alternatives</h2>
+            </div>
+            <span class="badge badge--success">Ranked list</span>
+          </div>
+          <div class="ranking-list">
+            <article class="ranking-card">
+              <div class="ranking-card__head">
+                <strong>1. UAE to Jamnagar via Cape of Good Hope</strong>
+                <span class="pill pill--high">86.4</span>
+              </div>
+              <p>Low sanctions risk, strong crude compatibility, manageable cost increase.</p>
+            </article>
+            <article class="ranking-card">
+              <div class="ranking-card__head">
+                <strong>2. Saudi Arabia to Paradip via Red Sea diversion</strong>
+                <span class="pill pill--moderate">79.1</span>
+              </div>
+              <p>Good compatibility and faster recovery once corridor volatility eases.</p>
+            </article>
+            <article class="ranking-card">
+              <div class="ranking-card__head">
+                <strong>3. Nigeria to Mangalore via Cape route</strong>
+                <span class="pill pill--moderate">74.6</span>
+              </div>
+              <p>Longer transit, but broadens geographic diversification.</p>
+            </article>
+          </div>
+          <div class="mini-table">
+            <div class="mini-table__row"><span>Expected cost delta</span><strong>+4.8%</strong></div>
+            <div class="mini-table__row"><span>Risk reduction</span><strong>0.71</strong></div>
+            <div class="mini-table__row"><span>Delivery delay</span><strong>+6.2 days</strong></div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+</body>
+</html>
+

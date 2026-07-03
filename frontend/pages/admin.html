@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <title>Admin | Energy Resilience Platform</title>
+  <link rel="stylesheet" href="../assets/css/main.css" />
+  <link rel="stylesheet" href="../assets/css/components.css" />
+</head>
+<body class="app-page">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar__brand">
+        <div class="brand-mark">ER</div>
+        <div>
+          <p class="brand-kicker">Energy Resilience</p>
+          <h2>Admin Console</h2>
+        </div>
+      </div>
+      <nav class="sidebar__nav">
+        <a class="nav-link" href="./dashboard.html">Dashboard</a>
+        <a class="nav-link" href="./scenarios.html">Scenarios</a>
+        <a class="nav-link" href="./procurement.html">Procurement</a>
+        <a class="nav-link" href="./spr.html">SPR</a>
+        <a class="nav-link" href="./map.html">Map</a>
+        <a class="nav-link nav-link--active" href="./admin.html" aria-current="page">Admin</a>
+      </nav>
+      <div class="sidebar__footer">
+        <span class="status-badge status-badge--warning">Admin only</span>
+        <p>Review audits, summaries, scheduler state, and demo data.</p>
+      </div>
+    </aside>
+
+    <div class="main-column">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Administration</p>
+          <h1>Platform controls</h1>
+          <p class="subtitle">Operational visibility for audit logs, system health, and demo seeding.</p>
+        </div>
+        <div class="topbar__actions">
+          <button class="btn btn-secondary" type="button">Refresh summary</button>
+          <button class="btn btn-primary" type="button">Seed demo</button>
+        </div>
+      </header>
+
+      <main class="page-content">
+        <section class="kpi-grid kpi-grid--admin">
+          <article class="stat-card">
+            <span class="stat-card__label">Users</span>
+            <strong class="stat-card__value">2</strong>
+          </article>
+          <article class="stat-card">
+            <span class="stat-card__label">Audit logs</span>
+            <strong class="stat-card__value">48</strong>
+          </article>
+          <article class="stat-card">
+            <span class="stat-card__label">Schedulers</span>
+            <strong class="stat-card__value">Enabled</strong>
+          </article>
+          <article class="stat-card">
+            <span class="stat-card__label">Ingestion</span>
+            <strong class="stat-card__value">Healthy</strong>
+          </article>
+        </section>
+
+        <section class="dashboard-grid dashboard-grid--admin">
+          <div class="panel">
+            <div class="panel__header">
+              <div>
+                <p class="eyebrow">System summary</p>
+                <h2>Current state</h2>
+              </div>
+              <span class="badge badge--success">Healthy</span>
+            </div>
+            <div class="mini-table">
+              <div class="mini-table__row"><span>Database</span><strong>Connected</strong></div>
+              <div class="mini-table__row"><span>Redis</span><strong>Connected</strong></div>
+              <div class="mini-table__row"><span>Scheduler</span><strong>Running</strong></div>
+              <div class="mini-table__row"><span>Backend</span><strong>FastAPI</strong></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__header">
+              <div>
+                <p class="eyebrow">Audit trail</p>
+                <h2>Recent actions</h2>
+              </div>
+              <span class="badge">Paginated</span>
+            </div>
+            <div class="audit-table">
+              <div class="audit-row">
+                <span>User login</span>
+                <strong>demo.admin@energy.local</strong>
+              </div>
+              <div class="audit-row">
+                <span>Scenario executed</span>
+                <strong>Hormuz closure - 14 day disruption</strong>
+              </div>
+              <div class="audit-row">
+                <span>Recommendation generated</span>
+                <strong>Procurement batch</strong>
+              </div>
+              <div class="audit-row">
+                <span>SPR optimized</span>
+                <strong>Reserve drawdown plan</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel panel--wide">
+            <div class="panel__header">
+              <div>
+                <p class="eyebrow">Manual actions</p>
+                <h2>Operational controls</h2>
+              </div>
+              <span class="badge badge--warning">Admin only</span>
+            </div>
+            <div class="button-row">
+              <button class="btn btn-secondary" type="button">Run ingestion</button>
+              <button class="btn btn-secondary" type="button">Recompute risk</button>
+              <button class="btn btn-secondary" type="button">View jobs</button>
+            </div>
+            <div class="note-box">
+              This page is intended for audit visibility, manual ingestion, scheduler checks, and demo seeding.
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+</body>
+</html>
+
