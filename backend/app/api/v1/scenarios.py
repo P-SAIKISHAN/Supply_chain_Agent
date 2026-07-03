@@ -36,11 +36,11 @@ def create(
         user_id=current_user.id,
         action="scenario_created",
         entity_type="scenario",
-        entity_id=str(result["scenario"]["id"]),
+        entity_id=str(result["id"]),
         metadata={
-            "scenario_name": result["scenario"]["name"],
-            "scenario_type": result["scenario"]["scenario_type"],
-            "status": result["scenario"]["status"],
+            "scenario_name": result["name"],
+            "scenario_type": result["scenario_type"],
+            "status": result["status"],
         },
         commit=True,
     )

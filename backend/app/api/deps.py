@@ -1,5 +1,4 @@
 from collections.abc import Callable
-from typing import Annotated
 
 from fastapi import Depends, HTTPException, Security, status
 from fastapi.security import OAuth2PasswordBearer
@@ -14,8 +13,8 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
 def get_current_user(
-    token: Annotated[str, Security(oauth2_scheme)],
-    db: Annotated[Session, Depends(get_db)],
+    token: str = Security(oauth2_scheme),
+    db: Session = Depends(get_db),
 ) -> User:
     """Resolve the authenticated user from a Bearer token."""
     try:
@@ -55,7 +54,7 @@ def get_current_user(
 def require_roles(*allowed_roles: str) -> Callable[[User], User]:
     """Return a dependency that enforces allowed roles for an endpoint."""
 
-    def role_dependency(current_user: Annotated[User, Depends(get_current_user)]) -> User:
+    def role_dependency(current_user: User = Depends(get_current_user)) -> User:
         if current_user.role not in allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
