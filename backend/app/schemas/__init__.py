@@ -26,6 +26,14 @@ from app.schemas.scenario import (
     ScenarioRunRequest,
     ScenarioSimulationResponse,
 )
+from app.schemas.procurement import (
+    ProcurementOptionResponse,
+    ProcurementRecommendRequest,
+    ProcurementRecommendResponse,
+    ProcurementRecommendationListResponse,
+    ProcurementRecommendationResponse,
+    ProcurementScope,
+)
 
 __all__ = [
     "AuditLogResponse",
@@ -34,7 +42,12 @@ __all__ = [
     "GeopoliticalEventResponse",
     "LoginRequest",
     "PortResponse",
+    "ProcurementOptionResponse",
     "ProcurementRecommendationResponse",
+    "ProcurementRecommendRequest",
+    "ProcurementRecommendResponse",
+    "ProcurementRecommendationListResponse",
+    "ProcurementScope",
     "RefineryResponse",
     "RiskScoreResponse",
     "SanctionsEventResponse",
