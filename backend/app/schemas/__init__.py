@@ -32,6 +32,7 @@ from app.schemas.procurement import (
     ProcurementRecommendationResponse,
     ProcurementScope,
 )
+from app.schemas.map import GeoJSONFeature, GeoJSONFeatureCollection, GeoJSONGeometry, MapNetworkResponse
 from app.schemas.spr import (
     SPRDailyReleaseResponse,
     SPRPlanListResponse,
@@ -54,6 +55,10 @@ __all__ = [
     "ProcurementRecommendResponse",
     "ProcurementRecommendationListResponse",
     "ProcurementScope",
+    "GeoJSONFeature",
+    "GeoJSONFeatureCollection",
+    "GeoJSONGeometry",
+    "MapNetworkResponse",
     "RefineryResponse",
     "RiskScoreResponse",
     "SanctionsEventResponse",
