@@ -42,3 +42,25 @@ class IngestionRunResponse(BaseModel):
     success_count: int
     failure_count: int
 
+
+class SchedulerJobResponse(BaseModel):
+    id: str
+    next_run_time: str | None = None
+    trigger: str
+
+
+class SchedulerStatusResponse(BaseModel):
+    enabled: bool
+    running: bool
+    jobs: list[SchedulerJobResponse] = Field(default_factory=list)
+    last_started_at: str | None = None
+    reason: str | None = None
+
+
+class JobRunResponse(BaseModel):
+    job_name: str
+    started_at: str
+    finished_at: str
+    status: str
+    result: dict = Field(default_factory=dict)
+    error: str | None = None

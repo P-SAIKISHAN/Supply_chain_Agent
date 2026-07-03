@@ -11,6 +11,7 @@ from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR, HTTP_422_UNPROCESSA
 from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.logging import configure_logging, get_logger
+from app.jobs.scheduler import start_scheduler, stop_scheduler
 
 configure_logging()
 logger = get_logger(__name__)
@@ -27,7 +28,11 @@ async def lifespan(app: FastAPI):
             "environment": settings.environment,
         },
     )
+    scheduler = start_scheduler()
+    if scheduler is not None:
+        logger.info("scheduler_initialized", extra={"enabled": settings.enable_scheduler})
     yield
+    stop_scheduler()
     logger.info("application_stopping")
 
 
@@ -123,4 +128,3 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
             }
         },
     )
-

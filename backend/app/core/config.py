@@ -19,6 +19,8 @@ class Settings(BaseSettings):
 
     database_url: str = Field(default="sqlite:///./energy_resilience.db")
     redis_url: str = Field(default="redis://localhost:6379/0")
+    enable_scheduler: bool = Field(default=False)
+    scheduler_interval_minutes: int = Field(default=30)
 
     cors_origins: list[str] = Field(
         default_factory=lambda: [
@@ -52,6 +54,16 @@ class Settings(BaseSettings):
             raw_values = [item.strip() for item in value.split(",")]
             return [item for item in raw_values if item]
         raise TypeError("cors_origins must be a list or comma-separated string")
+
+    @validator("enable_scheduler", pre=True)
+    def parse_enable_scheduler(cls, value: Any) -> bool:
+        if isinstance(value, bool):
+            return value
+        if value is None:
+            return False
+        if isinstance(value, str):
+            return value.strip().lower() in {"1", "true", "yes", "on"}
+        return bool(value)
 
 
 @lru_cache(maxsize=1)
