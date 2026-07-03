@@ -1,0 +1,69 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+.venv/
+venv/
+env/
+pip-wheel-metadata/
+*.egg-info/
+dist/
+build/
+
+# Backend artifacts
+backend/**/__pycache__/
+backend/**/*.py[cod]
+backend/**/.pytest_cache/
+backend/**/.mypy_cache/
+backend/**/.coverage
+backend/**/htmlcov/
+backend/**/dist/
+backend/**/build/
+
+# Node / frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.vite/
+*.tsbuildinfo
+
+# Logs and runtime files
+*.log
+logs/
+tmp/
+temp/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Local data / exports
+generated_reports/
+reports/
+*.sqlite
+*.db
+
+# Tooling
+.codex/
+.agents/
