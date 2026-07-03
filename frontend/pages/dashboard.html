@@ -46,37 +46,37 @@
             <strong data-auth-name>Demo analyst</strong>
             <span class="badge" data-auth-role>Analyst</span>
           </div>
-          <button class="btn btn-secondary" type="button">Export brief</button>
-          <button class="btn btn-primary" type="button">Refresh</button>
+          <button class="btn btn-secondary" type="button" data-dashboard-export>Export brief</button>
+          <button class="btn btn-primary" type="button" data-dashboard-refresh>Refresh</button>
         </div>
       </header>
 
       <main class="page-content">
-        <section class="kpi-grid">
+        <section class="kpi-grid" aria-label="Top KPIs">
           <article class="stat-card">
-            <span class="stat-card__label">Avg national risk</span>
-            <strong class="stat-card__value">67.2</strong>
-            <span class="stat-card__delta delta--up">+4.3 this week</span>
+            <span class="stat-card__label">National risk score</span>
+            <strong class="stat-card__value" id="kpi-national-risk">--</strong>
+            <span class="stat-card__delta" id="kpi-national-risk-detail">Loading...</span>
           </article>
           <article class="stat-card">
             <span class="stat-card__label">Active disruptions</span>
-            <strong class="stat-card__value">5</strong>
-            <span class="stat-card__delta delta--up">2 severe</span>
+            <strong class="stat-card__value" id="kpi-active-disruptions">--</strong>
+            <span class="stat-card__delta" id="kpi-active-disruptions-detail">Loading...</span>
           </article>
           <article class="stat-card">
             <span class="stat-card__label">Shipments at risk</span>
-            <strong class="stat-card__value">12</strong>
-            <span class="stat-card__delta delta--flat">Stable</span>
+            <strong class="stat-card__value" id="kpi-shipments-at-risk">--</strong>
+            <span class="stat-card__delta" id="kpi-shipments-at-risk-detail">Loading...</span>
+          </article>
+          <article class="stat-card">
+            <span class="stat-card__label">Strategic reserve days</span>
+            <strong class="stat-card__value" id="kpi-spr-days">--</strong>
+            <span class="stat-card__delta" id="kpi-spr-days-detail">Loading...</span>
           </article>
           <article class="stat-card">
             <span class="stat-card__label">Import dependency</span>
-            <strong class="stat-card__value">82%</strong>
-            <span class="stat-card__delta delta--down">Managed via diversification</span>
-          </article>
-          <article class="stat-card">
-            <span class="stat-card__label">SPR cover</span>
-            <strong class="stat-card__value">21 days</strong>
-            <span class="stat-card__delta delta--flat">Policy threshold met</span>
+            <strong class="stat-card__value" id="kpi-import-dependency">--</strong>
+            <span class="stat-card__delta" id="kpi-import-dependency-detail">Estimated from live state</span>
           </article>
         </section>
 
@@ -89,15 +89,24 @@
               </div>
               <span class="badge badge--critical">Updated live</span>
             </div>
-            <div class="chart-placeholder chart-placeholder--map">
-              <div class="chart-placeholder__glow"></div>
-              <div class="chart-placeholder__label">Corridor risk heatmap</div>
+            <div class="dashboard-chart-wrap">
+              <canvas id="corridor-risk-chart" class="chart-canvas" height="240"></canvas>
             </div>
-            <div class="mini-table">
-              <div class="mini-table__row"><span>Strait of Hormuz</span><strong>92</strong></div>
-              <div class="mini-table__row"><span>Red Sea</span><strong>84</strong></div>
-              <div class="mini-table__row"><span>Cape of Good Hope</span><strong>48</strong></div>
+            <div id="corridor-risk-table" class="dashboard-table"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__header">
+              <div>
+                <p class="eyebrow">Supplier risk</p>
+                <h2>Country exposure</h2>
+              </div>
+              <span class="badge">Ranking</span>
             </div>
+            <div class="dashboard-chart-wrap">
+              <canvas id="supplier-risk-chart" class="chart-canvas" height="240"></canvas>
+            </div>
+            <div id="supplier-risk-table" class="dashboard-table"></div>
           </div>
 
           <div class="panel">
@@ -106,35 +115,9 @@
                 <p class="eyebrow">Latest alerts</p>
                 <h2>Geopolitical signal feed</h2>
               </div>
-              <span class="badge">3 new</span>
+              <span class="badge" id="alerts-count-badge">Loading</span>
             </div>
-            <div class="alert-list">
-              <article class="alert-card alert-card--critical">
-                <h3>Hormuz navigation warning issued</h3>
-                <p>Tankers face elevated security and insurance pressure in the Persian Gulf.</p>
-              </article>
-              <article class="alert-card alert-card--high">
-                <h3>Red Sea attack risk remains elevated</h3>
-                <p>Route diversion and port delays remain the dominant logistics risk.</p>
-              </article>
-              <article class="alert-card alert-card--moderate">
-                <h3>OPEC output guidance cautious</h3>
-                <p>Market tightness may sustain a higher price floor over the next cycle.</p>
-              </article>
-            </div>
-          </div>
-
-          <div class="panel">
-            <div class="panel__header">
-              <div>
-                <p class="eyebrow">Price trend</p>
-                <h2>Benchmark movement</h2>
-              </div>
-              <span class="badge">Brent / Dubai / Oman</span>
-            </div>
-            <div class="chart-placeholder">
-              <div class="chart-placeholder__label">Trend chart placeholder</div>
-            </div>
+            <div id="alerts-panel" class="stack-list"></div>
           </div>
 
           <div class="panel">
@@ -145,29 +128,7 @@
               </div>
               <span class="badge badge--warning">Watch list</span>
             </div>
-            <div class="stress-list">
-              <div class="stress-item">
-                <div>
-                  <strong>Jamnagar Refinery</strong>
-                  <p>Feedstock flexibility is helping cushion exposure.</p>
-                </div>
-                <span class="pill pill--low">Low</span>
-              </div>
-              <div class="stress-item">
-                <div>
-                  <strong>Paradip Refinery</strong>
-                  <p>Route and port congestion remain the primary issues.</p>
-                </div>
-                <span class="pill pill--moderate">Moderate</span>
-              </div>
-              <div class="stress-item">
-                <div>
-                  <strong>Panipat Refinery</strong>
-                  <p>Longer inland supply chains increase recovery time.</p>
-                </div>
-                <span class="pill pill--high">High</span>
-              </div>
-            </div>
+            <div id="refinery-stress-panel" class="stack-list"></div>
           </div>
 
           <div class="panel panel--wide">
@@ -178,29 +139,21 @@
               </div>
               <a class="text-link" href="./procurement.html">Open recommendations</a>
             </div>
-            <div class="recommendation-strip">
-              <article class="recommendation-card">
-                <span class="recommendation-card__rank">01</span>
-                <div>
-                  <strong>Shift marginal liftings to UAE and West Africa</strong>
-                  <p>Best balance of route risk and crude compatibility.</p>
-                </div>
-              </article>
-              <article class="recommendation-card">
-                <span class="recommendation-card__rank">02</span>
-                <div>
-                  <strong>Pre-negotiate Cape of Good Hope routing</strong>
-                  <p>Longer transit, but reduces chokepoint exposure.</p>
-                </div>
-              </article>
-              <article class="recommendation-card">
-                <span class="recommendation-card__rank">03</span>
-                <div>
-                  <strong>Prepare SPR drawdown trigger</strong>
-                  <p>Support coastal refineries for the first shock window.</p>
-                </div>
-              </article>
+            <div id="recommendations-panel" class="recommendation-strip"></div>
+          </div>
+
+          <div class="panel panel--wide">
+            <div class="panel__header">
+              <div>
+                <p class="eyebrow">Price trend</p>
+                <h2>Benchmark movement</h2>
+              </div>
+              <span class="badge">Brent / Dubai / Oman</span>
             </div>
+            <div class="dashboard-chart-wrap dashboard-chart-wrap--tall">
+              <canvas id="price-trend-chart" class="chart-canvas" height="320"></canvas>
+            </div>
+            <div id="price-trend-legend" class="chart-legend"></div>
           </div>
         </section>
       </main>
@@ -209,6 +162,7 @@
 
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/dashboard.js"></script>
 </body>
 </html>
 
