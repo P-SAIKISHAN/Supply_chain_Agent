@@ -28,7 +28,7 @@
       </nav>
       <div class="sidebar__footer">
         <span class="status-badge status-badge--warning">Admin only</span>
-        <p>Review audits, summaries, scheduler state, and demo data.</p>
+        <p>Review audits, summaries, ingestion controls, and demo seeding.</p>
       </div>
     </aside>
 
@@ -37,11 +37,11 @@
         <div>
           <p class="eyebrow">Administration</p>
           <h1>Platform controls</h1>
-          <p class="subtitle">Operational visibility for audit logs, system health, and demo seeding.</p>
+          <p class="subtitle">Operational visibility for audit logs, system health, manual jobs, and demo seeding.</p>
         </div>
         <div class="topbar__actions">
-          <button class="btn btn-secondary" type="button">Refresh summary</button>
-          <button class="btn btn-primary" type="button">Seed demo</button>
+          <button class="btn btn-secondary" type="button" data-admin-refresh>Refresh summary</button>
+          <button class="btn btn-primary" type="button" data-admin-seed>Seed demo</button>
         </div>
       </header>
 
@@ -49,19 +49,19 @@
         <section class="kpi-grid kpi-grid--admin">
           <article class="stat-card">
             <span class="stat-card__label">Users</span>
-            <strong class="stat-card__value">2</strong>
+            <strong class="stat-card__value" id="admin-metric-users">--</strong>
           </article>
           <article class="stat-card">
             <span class="stat-card__label">Audit logs</span>
-            <strong class="stat-card__value">48</strong>
+            <strong class="stat-card__value" id="admin-metric-audit_logs">--</strong>
           </article>
           <article class="stat-card">
-            <span class="stat-card__label">Schedulers</span>
-            <strong class="stat-card__value">Enabled</strong>
+            <span class="stat-card__label">Scheduler</span>
+            <strong class="stat-card__value" id="admin-metric-scheduler">--</strong>
           </article>
           <article class="stat-card">
-            <span class="stat-card__label">Ingestion</span>
-            <strong class="stat-card__value">Healthy</strong>
+            <span class="stat-card__label">Last activity</span>
+            <strong class="stat-card__value" id="admin-metric-latest_activity">--</strong>
           </article>
         </section>
 
@@ -72,59 +72,81 @@
                 <p class="eyebrow">System summary</p>
                 <h2>Current state</h2>
               </div>
-              <span class="badge badge--success">Healthy</span>
+              <span class="badge" id="admin-system-badge">Loading</span>
             </div>
-            <div class="mini-table">
-              <div class="mini-table__row"><span>Database</span><strong>Connected</strong></div>
-              <div class="mini-table__row"><span>Redis</span><strong>Connected</strong></div>
-              <div class="mini-table__row"><span>Scheduler</span><strong>Running</strong></div>
-              <div class="mini-table__row"><span>Backend</span><strong>FastAPI</strong></div>
+
+            <div class="mini-table" id="admin-system-summary">
+              <div class="mini-table__row"><span>Loading</span><strong>...</strong></div>
+            </div>
+
+            <div class="panel__divider"></div>
+            <div class="button-row">
+              <button class="btn btn-secondary" type="button" data-admin-run-ingestion>Run ingestion</button>
+              <button class="btn btn-secondary" type="button" data-admin-recompute-risk>Recompute risk</button>
+              <button class="btn btn-secondary" type="button" data-admin-refresh-jobs>Job status</button>
+            </div>
+            <div class="note-box" id="admin-action-note">
+              Select ingestion sources, then trigger manual jobs as needed.
             </div>
           </div>
 
           <div class="panel">
             <div class="panel__header">
               <div>
-                <p class="eyebrow">Audit trail</p>
-                <h2>Recent actions</h2>
+                <p class="eyebrow">Manual ingestion</p>
+                <h2>Source selection</h2>
               </div>
-              <span class="badge">Paginated</span>
+              <span class="badge badge--warning">Demo-friendly</span>
             </div>
-            <div class="audit-table">
-              <div class="audit-row">
-                <span>User login</span>
-                <strong>demo.admin@energy.local</strong>
-              </div>
-              <div class="audit-row">
-                <span>Scenario executed</span>
-                <strong>Hormuz closure - 14 day disruption</strong>
-              </div>
-              <div class="audit-row">
-                <span>Recommendation generated</span>
-                <strong>Procurement batch</strong>
-              </div>
-              <div class="audit-row">
-                <span>SPR optimized</span>
-                <strong>Reserve drawdown plan</strong>
-              </div>
+
+            <form id="admin-ingestion-form" class="form-grid">
+              <label class="field field--full field--inline">
+                <input id="admin-demo-mode" type="checkbox" checked />
+                <span>Use demo mode</span>
+              </label>
+              <label class="field field--inline">
+                <input type="checkbox" value="news" name="ingestion-source" checked />
+                <span>News</span>
+              </label>
+              <label class="field field--inline">
+                <input type="checkbox" value="sanctions" name="ingestion-source" checked />
+                <span>Sanctions</span>
+              </label>
+              <label class="field field--inline">
+                <input type="checkbox" value="ais" name="ingestion-source" checked />
+                <span>AIS</span>
+              </label>
+              <label class="field field--inline">
+                <input type="checkbox" value="prices" name="ingestion-source" checked />
+                <span>Prices</span>
+              </label>
+              <label class="field field--inline">
+                <input type="checkbox" value="refinery" name="ingestion-source" checked />
+                <span>Refinery</span>
+              </label>
+            </form>
+
+            <div class="panel__divider"></div>
+            <div class="mini-table">
+              <div class="mini-table__row"><span>Ingestion status</span><strong id="admin-ingestion-status">Idle</strong></div>
+              <div class="mini-table__row"><span>Risk job status</span><strong id="admin-risk-status">Idle</strong></div>
+              <div class="mini-table__row"><span>Seed status</span><strong id="admin-seed-status">Idle</strong></div>
             </div>
           </div>
 
           <div class="panel panel--wide">
             <div class="panel__header">
               <div>
-                <p class="eyebrow">Manual actions</p>
-                <h2>Operational controls</h2>
+                <p class="eyebrow">Audit trail</p>
+                <h2>Recent actions</h2>
               </div>
-              <span class="badge badge--warning">Admin only</span>
+              <span class="badge" id="admin-audit-count">Loading</span>
             </div>
-            <div class="button-row">
-              <button class="btn btn-secondary" type="button">Run ingestion</button>
-              <button class="btn btn-secondary" type="button">Recompute risk</button>
-              <button class="btn btn-secondary" type="button">View jobs</button>
-            </div>
-            <div class="note-box">
-              This page is intended for audit visibility, manual ingestion, scheduler checks, and demo seeding.
+            <div id="admin-audit-list" class="audit-table">
+              <div class="audit-row">
+                <span>Loading audit logs</span>
+                <strong>...</strong>
+              </div>
             </div>
           </div>
         </section>
@@ -134,6 +156,6 @@
 
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/admin.js"></script>
 </body>
 </html>
-
