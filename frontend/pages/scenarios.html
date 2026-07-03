@@ -40,8 +40,8 @@
           <p class="subtitle">Model chokepoint closures, sanctions escalation, production cuts, and compound events.</p>
         </div>
         <div class="topbar__actions">
-          <button class="btn btn-secondary" type="button">Save draft</button>
-          <button class="btn btn-primary" type="button">Run scenario</button>
+          <button class="btn btn-secondary" type="button" data-scenario-refresh>Refresh list</button>
+          <button class="btn btn-primary" type="button" data-scenario-create>Save scenario</button>
         </div>
       </header>
 
@@ -54,53 +54,55 @@
             </div>
             <span class="badge">Heuristic model</span>
           </div>
-          <div class="form-grid">
-            <label class="field">
+
+          <form id="scenario-form" class="form-grid">
+            <label class="field field--full">
               <span>Scenario name</span>
-              <input type="text" value="Hormuz closure - 14 day disruption" />
+              <input id="scenario-name" type="text" value="Hormuz closure - 14 day disruption" />
             </label>
             <label class="field">
               <span>Scenario type</span>
-              <select>
-                <option>Chokepoint closure</option>
-                <option>Sanctions escalation</option>
-                <option>Production cut</option>
-                <option>Refinery outage</option>
+              <select id="scenario-type">
+                <option value="chokepoint_closure">Chokepoint closure</option>
+                <option value="sanctions_escalation">Sanctions escalation</option>
+                <option value="production_cut">Production cut</option>
+                <option value="refinery_outage">Refinery outage</option>
+                <option value="compound_disruption">Compound disruption</option>
               </select>
             </label>
             <label class="field">
               <span>Impacted corridors</span>
-              <input type="text" value="Strait of Hormuz, Red Sea" />
+              <input id="scenario-corridors" type="text" value="Strait of Hormuz, Red Sea" />
             </label>
             <label class="field">
               <span>Impacted suppliers</span>
-              <input type="text" value="Saudi Arabia, Iraq" />
-            </label>
-            <label class="field">
-              <span>Duration days</span>
-              <input type="number" value="14" />
+              <input id="scenario-suppliers" type="text" value="Saudi Arabia, Iraq" />
             </label>
             <label class="field">
               <span>Disruption severity %</span>
-              <input type="number" value="35" />
+              <input id="scenario-severity" type="number" min="0" max="100" value="35" />
+            </label>
+            <label class="field">
+              <span>Duration days</span>
+              <input id="scenario-duration" type="number" min="1" max="365" value="14" />
             </label>
             <label class="field">
               <span>Price shock %</span>
-              <input type="number" value="18" />
+              <input id="scenario-price-shock" type="number" min="0" max="100" value="18" />
             </label>
             <label class="field">
               <span>Tanker delay days</span>
-              <input type="number" value="6" />
+              <input id="scenario-delay" type="number" min="0" max="90" value="6" />
             </label>
             <label class="field field--full">
               <span>Trigger description</span>
-              <textarea rows="4">Temporary closure of the Strait of Hormuz with Red Sea spillover effects.</textarea>
+              <textarea id="scenario-trigger" rows="4">Temporary closure of the Strait of Hormuz with Red Sea spillover effects.</textarea>
             </label>
             <label class="field field--full field--inline">
-              <input type="checkbox" checked />
+              <input id="scenario-reserve" type="checkbox" checked />
               <span>Reserve usage allowed</span>
             </label>
-          </div>
+          </form>
         </section>
 
         <section class="panel">
@@ -109,43 +111,30 @@
               <p class="eyebrow">Scenario library</p>
               <h2>Saved disruptions</h2>
             </div>
-            <span class="badge badge--success">2 ready</span>
+            <span class="badge badge--success" id="scenario-count-badge">Loading</span>
           </div>
-          <div class="scenario-list">
-            <article class="scenario-card">
-              <div class="scenario-card__head">
-                <strong>Hormuz closure - 14 day disruption</strong>
-                <span class="pill pill--critical">Critical</span>
-              </div>
-              <p>Short, severe choke point closure with tactical reserve drawdown.</p>
-            </article>
-            <article class="scenario-card">
-              <div class="scenario-card__head">
-                <strong>Red Sea escalation + sanctions tightening</strong>
-                <span class="pill pill--high">High</span>
-              </div>
-              <p>Compound route and compliance shock affecting tanker optionality.</p>
-            </article>
-          </div>
+          <div id="scenario-list" class="scenario-list"></div>
 
           <div class="panel__divider"></div>
 
-          <div class="result-block">
-            <div class="result-block__metric">
-              <span>Supply loss</span>
-              <strong>11.6%</strong>
+          <div id="scenario-results" class="scenario-results">
+            <div class="result-block">
+              <div class="result-block__metric">
+                <span>Supply loss</span>
+                <strong id="scenario-supply-loss">--</strong>
+              </div>
+              <div class="result-block__metric">
+                <span>Fuel price impact</span>
+                <strong id="scenario-fuel-price">--</strong>
+              </div>
+              <div class="result-block__metric">
+                <span>Mitigation urgency</span>
+                <strong id="scenario-urgency">--</strong>
+              </div>
             </div>
-            <div class="result-block__metric">
-              <span>Fuel price impact</span>
-              <strong>18.4%</strong>
+            <div class="dashboard-chart-wrap dashboard-chart-wrap--tall">
+              <div id="scenario-result-details" class="stack-list"></div>
             </div>
-            <div class="result-block__metric">
-              <span>Mitigation urgency</span>
-              <strong>High</strong>
-            </div>
-          </div>
-          <div class="chart-placeholder chart-placeholder--tall">
-            <div class="chart-placeholder__label">Scenario impact output</div>
           </div>
         </section>
       </main>
@@ -154,6 +143,7 @@
 
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/scenarios.js"></script>
 </body>
 </html>
 
