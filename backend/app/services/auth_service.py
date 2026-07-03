@@ -84,5 +84,5 @@ def build_token_response(user: User) -> TokenResponse:
     """Create the response payload returned after successful authentication."""
     return TokenResponse(
         access_token=create_token_for_user(user),
-        user=CurrentUserResponse.model_validate(user),
+        user=CurrentUserResponse.from_orm(user),
     )

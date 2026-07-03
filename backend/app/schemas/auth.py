@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, validator
 
 UserRole = Literal["admin", "analyst", "procurement", "policymaker"]
 
@@ -14,13 +14,11 @@ class UserCreate(BaseModel):
     password: str = Field(min_length=8, max_length=128)
     role: UserRole = "analyst"
 
-    @field_validator("full_name")
-    @classmethod
+    @validator("full_name")
     def normalize_full_name(cls, value: str) -> str:
         return value.strip()
 
-    @field_validator("email")
-    @classmethod
+    @validator("email")
     def normalize_email(cls, value: EmailStr) -> str:
         return str(value).strip().lower()
 
@@ -31,16 +29,13 @@ class LoginRequest(BaseModel):
     email: EmailStr
     password: str = Field(min_length=1, max_length=128)
 
-    @field_validator("email")
-    @classmethod
+    @validator("email")
     def normalize_email(cls, value: EmailStr) -> str:
         return str(value).strip().lower()
 
 
 class CurrentUserResponse(BaseModel):
     """Public user representation returned by the auth APIs."""
-
-    model_config = ConfigDict(from_attributes=True)
 
     id: int
     full_name: str
@@ -50,6 +45,9 @@ class CurrentUserResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    class Config:
+        orm_mode = True
+
 
 class TokenResponse(BaseModel):
     """JWT token payload returned by register and login endpoints."""
@@ -57,4 +55,3 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: CurrentUserResponse
-

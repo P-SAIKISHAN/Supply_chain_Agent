@@ -1,19 +1,11 @@
 from functools import lru_cache
 from typing import Any
 
-from pydantic import AliasChoices, Field, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import BaseSettings, Field, validator
 
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables and .env files."""
-
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        case_sensitive=False,
-        extra="ignore",
-    )
 
     app_name: str = Field(default="AI-Driven Energy Supply Chain Resilience")
     app_version: str = Field(default="0.1.0")
@@ -25,19 +17,17 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = Field(default=60 * 24)
     algorithm: str = Field(default="HS256")
 
-    database_url: str = Field(
-        default="postgresql+psycopg://postgres:postgres@localhost:5432/energy_resilience"
-    )
+    database_url: str = Field(default="sqlite:///./energy_resilience.db")
     redis_url: str = Field(default="redis://localhost:6379/0")
 
     cors_origins: list[str] = Field(
-        validation_alias=AliasChoices("BACKEND_CORS_ORIGINS", "CORS_ORIGINS"),
         default_factory=lambda: [
             "http://localhost:3000",
             "http://127.0.0.1:3000",
             "http://localhost:5500",
             "http://127.0.0.1:5500",
-        ]
+        ],
+        env="BACKEND_CORS_ORIGINS",
     )
 
     log_level: str = Field(default="INFO")
@@ -45,10 +35,15 @@ class Settings(BaseSettings):
     redoc_url: str = Field(default="/redoc")
     openapi_url: str = Field(default="/openapi.json")
 
-    @field_validator("cors_origins", mode="before")
-    @classmethod
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+        case_sensitive = False
+        extra = "ignore"
+
+    @validator("cors_origins", pre=True)
     def parse_cors_origins(cls, value: Any) -> list[str]:
-        """Allow comma-separated strings or JSON arrays from environment variables."""
+        """Allow comma-separated strings from environment variables."""
         if value is None:
             return []
         if isinstance(value, list):

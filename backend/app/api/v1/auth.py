@@ -57,5 +57,4 @@ def login(credentials: LoginRequest, db: Session = Depends(get_db)) -> TokenResp
 @router.get("/me", response_model=CurrentUserResponse, summary="Get current user")
 def me(current_user: User = Depends(get_current_user)) -> CurrentUserResponse:
     """Return the authenticated user's profile."""
-    return CurrentUserResponse.model_validate(current_user)
-
+    return CurrentUserResponse.from_orm(current_user)

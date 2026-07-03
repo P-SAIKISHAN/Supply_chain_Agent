@@ -1,8 +1,8 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
 
 class ORMBaseSchema(BaseModel):
     """Base schema configured for SQLAlchemy model serialization."""
 
-    model_config = ConfigDict(from_attributes=True)
-
+    class Config:
+        orm_mode = True
