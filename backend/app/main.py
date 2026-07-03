@@ -10,7 +10,10 @@ from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR, HTTP_422_UNPROCESSA
 
 from app.api.v1.router import api_router
 from app.core.config import settings
+from app.core.errors import build_error_body
 from app.core.logging import configure_logging, get_logger
+from app.core.middleware import RateLimitMiddleware, RequestLoggingMiddleware
+from app.core.startup import verify_startup_dependencies
 from app.jobs.scheduler import start_scheduler, stop_scheduler
 
 configure_logging()
@@ -26,6 +29,17 @@ async def lifespan(app: FastAPI):
             "app_name": settings.app_name,
             "version": settings.app_version,
             "environment": settings.environment,
+        },
+    )
+    startup_status = verify_startup_dependencies()
+    logger.info(
+        "startup_checks_completed",
+        extra={
+            "database_ready": startup_status.database_ready,
+            "redis_ready": startup_status.redis_ready,
+            "initialized_tables": startup_status.initialized_tables,
+            "strict": startup_status.strict,
+            "warnings": startup_status.warnings,
         },
     )
     scheduler = start_scheduler()
@@ -46,6 +60,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(RequestLoggingMiddleware)
+app.add_middleware(RateLimitMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
@@ -81,13 +97,12 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
     )
     return JSONResponse(
         status_code=exc.status_code,
-        content={
-            "error": {
-                "type": "http_error",
-                "message": exc.detail,
-                "status_code": exc.status_code,
-            }
-        },
+        content=build_error_body(
+            error_type="http_error",
+            message=str(exc.detail),
+            status_code=exc.status_code,
+            request=request,
+        ),
     )
 
 
@@ -102,13 +117,13 @@ async def validation_exception_handler(
     )
     return JSONResponse(
         status_code=HTTP_422_UNPROCESSABLE_ENTITY,
-        content={
-            "error": {
-                "type": "validation_error",
-                "message": "Request validation failed",
-                "details": exc.errors(),
-            }
-        },
+        content=build_error_body(
+            error_type="validation_error",
+            message="Request validation failed",
+            status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+            request=request,
+            details=exc.errors(),
+        ),
     )
 
 
@@ -121,10 +136,10 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
     )
     return JSONResponse(
         status_code=HTTP_500_INTERNAL_SERVER_ERROR,
-        content={
-            "error": {
-                "type": "internal_server_error",
-                "message": "An unexpected error occurred",
-            }
-        },
+        content=build_error_body(
+            error_type="internal_server_error",
+            message="An unexpected error occurred",
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+            request=request,
+        ),
     )

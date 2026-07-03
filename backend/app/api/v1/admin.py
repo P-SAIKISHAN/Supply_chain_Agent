@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
@@ -163,6 +164,8 @@ def jobs_status(
 def audit_logs(
     limit: int = Query(100, ge=1, le=500),
     offset: int = Query(0, ge=0),
+    sort_by: str = Query(default="created_at"),
+    sort_order: Literal["asc", "desc"] = "desc",
     action: str | None = None,
     entity_type: str | None = None,
     user_id: int | None = None,
@@ -175,6 +178,8 @@ def audit_logs(
         db,
         limit=limit,
         offset=offset,
+        sort_by=sort_by,
+        sort_order=sort_order,
         action=action,
         entity_type=entity_type,
         user_id=user_id,

@@ -65,6 +65,10 @@ def test_spr_optimization_flow(client, auth_headers):
     assert plans_response.status_code == 200
     plans_data = plans_response.json()
     assert plans_data["total_count"] >= 1
+    assert plans_data["limit"] >= 1
+    assert plans_data["offset"] == 0
+    assert plans_data["page"] == 1
+    assert plans_data["pages"] >= 1
     assert len(plans_data["items"]) >= 1
 
     plan_id = plans_data["items"][0]["id"]

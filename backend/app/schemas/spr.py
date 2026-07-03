@@ -3,15 +3,15 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field, conint, confloat
+from pydantic import Field, conint, confloat
 
-from app.schemas.common import ORMBaseSchema
+from app.schemas.common import APIBaseModel, ORMBaseSchema
 
 
 SPRScope = Literal["national", "scenario", "refinery"]
 
 
-class SPROptimizeRequest(BaseModel):
+class SPROptimizeRequest(APIBaseModel):
     """Input for the strategic reserve optimizer."""
 
     target_scope: SPRScope = "national"
@@ -25,7 +25,7 @@ class SPROptimizeRequest(BaseModel):
     reserve_usage_allowed: bool = True
 
 
-class SPRRefineryAllocationResponse(BaseModel):
+class SPRRefineryAllocationResponse(APIBaseModel):
     refinery_id: int
     name: str
     state: str
@@ -35,19 +35,11 @@ class SPRRefineryAllocationResponse(BaseModel):
     allocated_share_pct: float
     rationale: str
 
-    class Config:
-        orm_mode = True
-
-
-class SPRDailyReleaseResponse(BaseModel):
+class SPRDailyReleaseResponse(APIBaseModel):
     day: int
     release_bbl: float
     cumulative_bbl: float
     allocation: list[SPRRefineryAllocationResponse] = Field(default_factory=list)
-
-    class Config:
-        orm_mode = True
-
 
 class SPRPlanResponse(ORMBaseSchema):
     id: int
@@ -62,7 +54,7 @@ class SPRPlanResponse(ORMBaseSchema):
     updated_at: datetime
 
 
-class SPROptimizeResponse(BaseModel):
+class SPROptimizeResponse(APIBaseModel):
     """Front-end friendly SPR optimization result."""
 
     plan: SPRPlanResponse
@@ -71,8 +63,12 @@ class SPROptimizeResponse(BaseModel):
     risk_notes: list[str] = Field(default_factory=list)
 
 
-class SPRPlanListResponse(BaseModel):
+class SPRPlanListResponse(APIBaseModel):
     items: list[SPRPlanResponse] = Field(default_factory=list)
     total_count: int
-
-
+    limit: int
+    offset: int
+    page: int
+    pages: int
+    sort_by: str | None = None
+    sort_order: str | None = None

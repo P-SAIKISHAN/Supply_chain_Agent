@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from typing import Literal
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
@@ -52,16 +53,28 @@ def recommend(
 @router.get("/recommendations", response_model=ProcurementRecommendationListResponse, summary="List procurement recommendations")
 def recommendations(
     limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
     scenario_id: int | None = None,
     refinery_id: int | None = None,
+    supplier_region: str | None = None,
+    action_priority: Literal["low", "medium", "high", "critical"] | None = None,
+    min_overall_score: float | None = Query(default=None, ge=0.0, le=100.0),
+    sort_by: str = Query(default="generated_at"),
+    sort_order: Literal["asc", "desc"] = "desc",
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> ProcurementRecommendationListResponse:
     return list_procurement_recommendations(
         db,
         limit=limit,
+        offset=offset,
         scenario_id=scenario_id,
         refinery_id=refinery_id,
+        supplier_region=supplier_region,
+        action_priority=action_priority,
+        min_overall_score=min_overall_score,
+        sort_by=sort_by,
+        sort_order=sort_order,
     )
 
 

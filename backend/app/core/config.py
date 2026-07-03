@@ -47,6 +47,9 @@ class Settings(BaseSettings):
     secret_key: str = Field(default="change-me-in-production")
     access_token_expire_minutes: int = Field(default=60 * 24)
     algorithm: str = Field(default="HS256")
+    rate_limit_enabled: bool = Field(default=False)
+    rate_limit_requests_per_minute: int = Field(default=120)
+    startup_check_strict: bool = Field(default=True)
 
     database_url: str = Field(default="sqlite:///./energy_resilience.db")
     redis_url: str = Field(default="redis://localhost:6379/0")
@@ -149,6 +152,27 @@ class Settings(BaseSettings):
         if isinstance(value, str):
             return value.strip().lower() in {"1", "true", "yes", "on"}
         return bool(value)
+
+    @field_validator("environment", mode="before")
+    def normalize_environment(cls, value: Any) -> str:
+        environment = str(value or "development").strip().lower()
+        allowed = {"development", "staging", "production"}
+        if environment not in allowed:
+            raise ValueError(f"environment must be one of: {', '.join(sorted(allowed))}")
+        return environment
+
+    @field_validator("secret_key", mode="before")
+    def normalize_secret_key(cls, value: Any) -> str:
+        secret_key = str(value or "").strip()
+        if not secret_key:
+            raise ValueError("secret_key must not be empty")
+        return secret_key
+
+    @field_validator("rate_limit_requests_per_minute", mode="before")
+    def normalize_rate_limit(cls, value: Any) -> int:
+        if value is None or value == "":
+            return 120
+        return max(1, int(value))
 
 
 @lru_cache(maxsize=1)

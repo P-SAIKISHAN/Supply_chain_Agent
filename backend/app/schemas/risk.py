@@ -1,10 +1,12 @@
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from app.schemas.common import APIBaseModel, ORMBaseSchema
 
 
-class RiskRecomputeResponse(BaseModel):
+class RiskRecomputeResponse(APIBaseModel):
     """Summary returned after recomputing risk scores."""
 
     recomputed_at: datetime
@@ -21,20 +23,12 @@ class RiskRecomputeResponse(BaseModel):
     event_breakdown: dict[str, Any] = Field(default_factory=dict)
     price_breakdown: dict[str, Any] = Field(default_factory=dict)
 
-    class Config:
-        orm_mode = True
-
-
-class RiskContributionResponse(BaseModel):
+class RiskContributionResponse(APIBaseModel):
     name: str
     value: float
     weight: float
 
-    class Config:
-        orm_mode = True
-
-
-class RiskScoreResponse(BaseModel):
+class RiskScoreResponse(ORMBaseSchema):
     id: int
     scope_type: str
     scope_id: str
@@ -44,11 +38,7 @@ class RiskScoreResponse(BaseModel):
     contributing_factors: dict[str, Any] = Field(default_factory=dict)
     computed_at: datetime
 
-    class Config:
-        orm_mode = True
-
-
-class RiskOverviewResponse(BaseModel):
+class RiskOverviewResponse(APIBaseModel):
     national_score: float
     national_level: str
     average_confidence: float
@@ -57,11 +47,7 @@ class RiskOverviewResponse(BaseModel):
     price_shock_index: float
     latest_signal_count: int
 
-    class Config:
-        orm_mode = True
-
-
-class CorridorRiskResponse(BaseModel):
+class CorridorRiskResponse(APIBaseModel):
     scope_id: str
     corridor_id: int
     name: str
@@ -71,11 +57,7 @@ class CorridorRiskResponse(BaseModel):
     confidence_score: float
     contributing_factors: dict[str, Any] = Field(default_factory=dict)
 
-    class Config:
-        orm_mode = True
-
-
-class SupplierRiskResponse(BaseModel):
+class SupplierRiskResponse(APIBaseModel):
     scope_id: str
     supplier_country_id: int
     name: str
@@ -85,11 +67,7 @@ class SupplierRiskResponse(BaseModel):
     confidence_score: float
     contributing_factors: dict[str, Any] = Field(default_factory=dict)
 
-    class Config:
-        orm_mode = True
-
-
-class ShipmentRiskResponse(BaseModel):
+class ShipmentRiskResponse(APIBaseModel):
     scope_id: str
     shipment_id: int
     tanker_name: str
@@ -102,11 +80,7 @@ class ShipmentRiskResponse(BaseModel):
     risk_flag: bool
     contributing_factors: dict[str, Any] = Field(default_factory=dict)
 
-    class Config:
-        orm_mode = True
-
-
-class RefineryRiskResponse(BaseModel):
+class RefineryRiskResponse(APIBaseModel):
     scope_id: str
     refinery_id: int
     name: str
@@ -116,6 +90,3 @@ class RefineryRiskResponse(BaseModel):
     risk_level: str
     confidence_score: float
     contributing_factors: dict[str, Any] = Field(default_factory=dict)
-
-    class Config:
-        orm_mode = True

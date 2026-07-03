@@ -49,3 +49,17 @@ def test_scenario_create_run_and_results(client, auth_headers):
     results_data = results_response.json()
     assert results_data["scenario_id"] == scenario_id
     assert results_data["result"]["scenario_id"] == scenario_id
+
+    list_response = client.get(
+        "/api/v1/scenarios",
+        headers=auth_headers,
+        params={"limit": 1, "offset": 0, "sort_by": "created_at", "sort_order": "desc"},
+    )
+    assert list_response.status_code == 200
+    list_data = list_response.json()
+    assert list_data["total_count"] >= 1
+    assert list_data["limit"] == 1
+    assert list_data["offset"] == 0
+    assert list_data["page"] == 1
+    assert list_data["pages"] >= 1
+    assert len(list_data["items"]) == 1

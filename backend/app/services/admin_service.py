@@ -64,6 +64,8 @@ def list_audit_logs(
     *,
     limit: int = 100,
     offset: int = 0,
+    sort_by: str = "created_at",
+    sort_order: str = "desc",
     action: str | None = None,
     entity_type: str | None = None,
     user_id: int | None = None,
@@ -76,6 +78,8 @@ def list_audit_logs(
         db,
         limit=limit,
         offset=offset,
+        sort_by=sort_by,
+        sort_order=sort_order,
         action=action,
         entity_type=entity_type,
         user_id=user_id,
@@ -87,6 +91,10 @@ def list_audit_logs(
         total_count=total,
         limit=limit,
         offset=offset,
+        page=(offset // limit) + 1 if limit > 0 else 1,
+        pages=(total + limit - 1) // limit if limit > 0 and total > 0 else 0,
+        sort_by=sort_by,
+        sort_order=sort_order,
     )
 
 

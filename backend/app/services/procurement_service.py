@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from math import ceil
 from typing import Any
 
 from sqlalchemy import func
@@ -389,6 +390,10 @@ def _serialize_row(row: ProcurementRecommendationModel) -> dict[str, Any]:
     }
 
 
+def _supplier_region_map(db: Session) -> dict[str, str]:
+    return {supplier.name.lower(): supplier.region for supplier in db.query(SupplierCountry).all()}
+
+
 def _build_candidates(
     db: Session,
     target_scope: ProcurementScope,
@@ -612,22 +617,69 @@ def generate_procurement_recommendations(
 def list_procurement_recommendations(
     db: Session,
     limit: int = 50,
+    offset: int = 0,
     scenario_id: int | None = None,
     refinery_id: int | None = None,
+    supplier_region: str | None = None,
+    action_priority: str | None = None,
+    min_overall_score: float | None = None,
+    sort_by: str = "generated_at",
+    sort_order: str = "desc",
 ) -> ProcurementRecommendationListResponse:
     query = db.query(ProcurementRecommendationModel).order_by(ProcurementRecommendationModel.generated_at.desc())
-    count_query = db.query(func.count(ProcurementRecommendationModel.id))
     if scenario_id is not None:
         query = query.filter(ProcurementRecommendationModel.scenario_id == scenario_id)
-        count_query = count_query.filter(ProcurementRecommendationModel.scenario_id == scenario_id)
     if refinery_id is not None:
         query = query.filter(ProcurementRecommendationModel.refinery_id == refinery_id)
-        count_query = count_query.filter(ProcurementRecommendationModel.refinery_id == refinery_id)
 
-    rows = query.limit(limit).all()
+    rows = [_serialize_row(row) for row in query.all()]
+    supplier_regions = _supplier_region_map(db)
+    if supplier_region:
+        rows = [
+            row
+            for row in rows
+            if str(supplier_regions.get(str(row.get("recommended_supplier", "")).lower(), "")).lower()
+            == supplier_region.lower()
+        ]
+    if action_priority:
+        rows = [row for row in rows if str(row.get("action_priority", "")).lower() == action_priority.lower()]
+    if min_overall_score is not None:
+        rows = [row for row in rows if float(row.get("overall_score", 0.0)) >= float(min_overall_score)]
+
+    sort_key = sort_by.lower().strip()
+
+    def _sort_value(row: dict[str, Any]) -> Any:
+        if sort_key == "overall_score":
+            return float(row.get("overall_score", 0.0))
+        if sort_key == "expected_cost_delta":
+            return float(row.get("expected_cost_delta", 0.0))
+        if sort_key == "risk_reduction_score":
+            return float(row.get("risk_reduction_score", 0.0))
+        if sort_key == "compatibility_score":
+            return float(row.get("compatibility_score", 0.0))
+        if sort_key == "action_priority":
+            priority_rank = {"critical": 4, "high": 3, "medium": 2, "low": 1}
+            return priority_rank.get(str(row.get("action_priority", "")).lower(), 0)
+        if sort_key == "recommended_supplier":
+            return str(row.get("recommended_supplier", "")).lower()
+        return row.get("generated_at")
+
+    reverse = sort_order.lower() != "asc"
+    rows.sort(key=_sort_value, reverse=reverse)
+    total_count = len(rows)
+    paged_rows = rows[offset : offset + limit]
+    page = (offset // limit) + 1 if limit > 0 else 1
+    pages = ceil(total_count / limit) if limit > 0 and total_count > 0 else 0
+
     return ProcurementRecommendationListResponse(
-        items=[ProcurementRecommendationResponse(**_serialize_row(row)) for row in rows],
-        total_count=int(count_query.scalar() or 0),
+        items=[ProcurementRecommendationResponse(**row) for row in paged_rows],
+        total_count=total_count,
+        limit=limit,
+        offset=offset,
+        page=page,
+        pages=pages,
+        sort_by=sort_by,
+        sort_order=sort_order,
     )
 
 

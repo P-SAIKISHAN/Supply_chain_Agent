@@ -3,14 +3,14 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field, conint
+from pydantic import Field, conint
 
-from app.schemas.common import ORMBaseSchema
+from app.schemas.common import APIBaseModel, ORMBaseSchema
 
 ProcurementScope = Literal["national", "refinery", "scenario"]
 
 
-class ProcurementRecommendRequest(BaseModel):
+class ProcurementRecommendRequest(APIBaseModel):
     """Input for generating procurement alternatives."""
 
     target_scope: ProcurementScope = "national"
@@ -42,7 +42,7 @@ class ProcurementRecommendationResponse(ORMBaseSchema):
     rationale: str | None = None
 
 
-class ProcurementOptionResponse(BaseModel):
+class ProcurementOptionResponse(APIBaseModel):
     """One ranked recommendation option produced by the engine."""
 
     title: str
@@ -65,7 +65,7 @@ class ProcurementOptionResponse(BaseModel):
     recommendation_payload: dict[str, Any] = Field(default_factory=dict)
 
 
-class ProcurementRecommendResponse(BaseModel):
+class ProcurementRecommendResponse(APIBaseModel):
     """Batch response returned after generating recommendations."""
 
     target_scope: ProcurementScope
@@ -75,9 +75,14 @@ class ProcurementRecommendResponse(BaseModel):
     recommendations: list[ProcurementOptionResponse] = Field(default_factory=list)
 
 
-class ProcurementRecommendationListResponse(BaseModel):
+class ProcurementRecommendationListResponse(APIBaseModel):
     """Lightweight list response for persisted recommendations."""
 
     items: list[ProcurementRecommendationResponse] = Field(default_factory=list)
     total_count: int
-
+    limit: int
+    offset: int
+    page: int
+    pages: int
+    sort_by: str | None = None
+    sort_order: str | None = None

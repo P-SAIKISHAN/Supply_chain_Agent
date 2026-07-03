@@ -66,6 +66,10 @@ def test_procurement_recommendation_generation(client, auth_headers):
     assert list_response.status_code == 200
     list_data = list_response.json()
     assert list_data["total_count"] >= 3
+    assert list_data["limit"] >= 1
+    assert list_data["offset"] == 0
+    assert list_data["page"] == 1
+    assert list_data["pages"] >= 1
     assert len(list_data["items"]) >= 3
 
     recommendation_id = list_data["items"][0]["id"]

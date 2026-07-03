@@ -39,7 +39,7 @@ services:
     environment:
       APP_NAME: ${APP_NAME:-AI-Driven Energy Supply Chain Resilience}
       APP_VERSION: ${APP_VERSION:-0.1.0}
-      ENVIRONMENT: ${ENVIRONMENT:-production}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
       DEBUG: ${DEBUG:-false}
       DEMO_MODE: ${DEMO_MODE:-true}
       ENABLE_SCHEDULER: ${ENABLE_SCHEDULER:-false}

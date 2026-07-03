@@ -4,6 +4,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, validator
 
+from app.schemas.common import ORMBaseSchema
+
 UserRole = Literal["admin", "analyst", "procurement", "policymaker"]
 EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
@@ -42,7 +44,7 @@ class LoginRequest(BaseModel):
         return normalized
 
 
-class CurrentUserResponse(BaseModel):
+class CurrentUserResponse(ORMBaseSchema):
     """Public user representation returned by the auth APIs."""
 
     id: int
@@ -52,10 +54,6 @@ class CurrentUserResponse(BaseModel):
     is_active: bool
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        orm_mode = True
-
 
 class TokenResponse(BaseModel):
     """JWT token payload returned by register and login endpoints."""

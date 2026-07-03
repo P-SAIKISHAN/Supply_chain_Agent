@@ -1,4 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import Query
+from typing import Literal
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
@@ -7,6 +9,7 @@ from app.models.user import User
 from app.schemas.scenario import (
     ScenarioCreateRequest,
     ScenarioListItemResponse,
+    ScenarioListResponse,
     ScenarioResponse,
     ScenarioResultsEnvelopeResponse,
     ScenarioRunRequest,
@@ -47,12 +50,26 @@ def create(
     return result
 
 
-@router.get("", response_model=list[ScenarioListItemResponse], summary="List disruption scenarios")
+@router.get("", response_model=ScenarioListResponse, summary="List disruption scenarios")
 def list_all(
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    status: str | None = None,
+    scenario_type: str | None = None,
+    sort_by: str = Query(default="created_at"),
+    sort_order: Literal["asc", "desc"] = "desc",
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-) -> list[dict]:
-    return list_scenarios(db)
+) -> ScenarioListResponse:
+    return list_scenarios(
+        db,
+        limit=limit,
+        offset=offset,
+        status=status,
+        scenario_type=scenario_type,
+        sort_by=sort_by,
+        sort_order=sort_order,
+    )
 
 
 @router.get("/{scenario_id}", response_model=ScenarioListItemResponse, summary="Get a scenario")

@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from typing import Literal
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
@@ -48,11 +49,21 @@ def optimize(
 @router.get("/plans", response_model=SPRPlanListResponse, summary="List SPR plans")
 def plans(
     limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
     scenario_id: int | None = None,
+    sort_by: str = Query(default="generated_at"),
+    sort_order: Literal["asc", "desc"] = "desc",
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> SPRPlanListResponse:
-    return list_spr_plans(db, limit=limit, scenario_id=scenario_id)
+    return list_spr_plans(
+        db,
+        limit=limit,
+        offset=offset,
+        scenario_id=scenario_id,
+        sort_by=sort_by,
+        sort_order=sort_order,
+    )
 
 
 @router.get("/plans/{plan_id}", response_model=SPRPlanResponse, summary="Get an SPR plan")

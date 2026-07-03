@@ -8,6 +8,7 @@ from app.core.config import settings
 from app.core.security import create_access_token, get_password_hash, verify_password
 from app.models.user import User
 from app.schemas.auth import CurrentUserResponse, LoginRequest, TokenResponse, UserCreate
+from app.schemas.common import model_from_orm
 
 
 class AuthenticationError(ValueError):
@@ -84,5 +85,5 @@ def build_token_response(user: User) -> TokenResponse:
     """Create the response payload returned after successful authentication."""
     return TokenResponse(
         access_token=create_token_for_user(user),
-        user=CurrentUserResponse.from_orm(user),
+        user=model_from_orm(CurrentUserResponse, user),
     )

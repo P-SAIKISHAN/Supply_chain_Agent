@@ -419,19 +419,58 @@ def optimize_spr_plan(db: Session, payload: SPROptimizeRequest) -> dict[str, Any
     }
 
 
-def list_spr_plans(db: Session, limit: int = 50, scenario_id: int | None = None) -> SPRPlanListResponse:
-    query = db.query(SPRPlan).order_by(SPRPlan.generated_at.desc())
-    count_query = db.query(func.count(SPRPlan.id))
+def list_spr_plans(
+    db: Session,
+    limit: int = 50,
+    offset: int = 0,
+    scenario_id: int | None = None,
+    sort_by: str = "generated_at",
+    sort_order: str = "desc",
+) -> SPRPlanListResponse:
+    query = db.query(SPRPlan)
     if scenario_id is not None:
         query = query.filter(SPRPlan.scenario_id == scenario_id)
-        count_query = count_query.filter(SPRPlan.scenario_id == scenario_id)
 
-    rows = query.limit(limit).all()
-    items = [
-        SPRPlanResponse(**_serialize_plan(row, {"daily_release_schedule": row.daily_release_schedule, "replenishment_strategy": row.replenishment_strategy}))
-        for row in rows
+    rows = [
+        _serialize_plan(
+            row,
+            {
+                "daily_release_schedule": row.daily_release_schedule,
+                "replenishment_strategy": row.replenishment_strategy,
+            },
+        )
+        for row in query.all()
     ]
-    return SPRPlanListResponse(items=items, total_count=int(count_query.scalar() or 0))
+
+    sort_key = sort_by.lower().strip()
+
+    def _sort_value(row: dict[str, Any]) -> Any:
+        if sort_key == "drawdown_days":
+            return int(row.get("drawdown_days", 0) or 0)
+        if sort_key == "total_drawdown_bbl":
+            return float(row.get("total_drawdown_bbl", 0.0))
+        if sort_key == "scenario_id":
+            return int(row.get("scenario_id") or 0)
+        return row.get("generated_at")
+
+    reverse = sort_order.lower() != "asc"
+    rows.sort(key=_sort_value, reverse=reverse)
+    total_count = len(rows)
+    paged_rows = rows[offset : offset + limit]
+    page = (offset // limit) + 1 if limit > 0 else 1
+    pages = ceil(total_count / limit) if limit > 0 and total_count > 0 else 0
+
+    items = [SPRPlanResponse(**row) for row in paged_rows]
+    return SPRPlanListResponse(
+        items=items,
+        total_count=total_count,
+        limit=limit,
+        offset=offset,
+        page=page,
+        pages=pages,
+        sort_by=sort_by,
+        sort_order=sort_order,
+    )
 
 
 def get_spr_plan(db: Session, plan_id: int) -> SPRPlanResponse:
@@ -441,4 +480,3 @@ def get_spr_plan(db: Session, plan_id: int) -> SPRPlanResponse:
     return SPRPlanResponse(
         **_serialize_plan(row, {"daily_release_schedule": row.daily_release_schedule, "replenishment_strategy": row.replenishment_strategy})
     )
-

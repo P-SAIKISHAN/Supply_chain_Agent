@@ -82,6 +82,8 @@ def list_audit_logs(
     *,
     limit: int = 100,
     offset: int = 0,
+    sort_by: str = "created_at",
+    sort_order: str = "desc",
     action: str | None = None,
     entity_type: str | None = None,
     user_id: int | None = None,
@@ -89,7 +91,7 @@ def list_audit_logs(
     created_before: datetime | None = None,
 ) -> tuple[list[AuditLog], int]:
     """Return a filtered, paginated audit-log slice plus the total count."""
-    query = select(AuditLog).options(joinedload(AuditLog.user)).order_by(AuditLog.created_at.desc())
+    query = select(AuditLog).options(joinedload(AuditLog.user)).outerjoin(AuditLog.user)
     count_query = select(func.count(AuditLog.id))
 
     filters = []
@@ -109,6 +111,15 @@ def list_audit_logs(
             query = query.where(clause)
             count_query = count_query.where(clause)
 
+    order_map = {
+        "created_at": AuditLog.created_at,
+        "action": AuditLog.action,
+        "entity_type": AuditLog.entity_type,
+        "user_email": User.email,
+    }
+    order_column = order_map.get(sort_by, AuditLog.created_at)
+    query = query.order_by(order_column.asc() if sort_order.lower() == "asc" else order_column.desc())
+
     total = int(db.scalar(count_query) or 0)
     rows = list(db.scalars(query.limit(limit).offset(offset)).all())
     return rows, total
@@ -121,4 +132,3 @@ def user_login_audit_metadata(user: User) -> dict[str, Any]:
         "role": user.role,
         "full_name": user.full_name,
     }
-

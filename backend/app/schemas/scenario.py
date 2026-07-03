@@ -3,12 +3,12 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, Field, conint, confloat
+from pydantic import Field, conint, confloat
 
-from app.schemas.common import ORMBaseSchema
+from app.schemas.common import APIBaseModel, ORMBaseSchema
 
 
-class ScenarioAssumptions(BaseModel):
+class ScenarioAssumptions(APIBaseModel):
     """Structured assumptions used by the scenario simulation engine."""
 
     impacted_corridors: list[int] = Field(default_factory=list)
@@ -20,7 +20,7 @@ class ScenarioAssumptions(BaseModel):
     reserve_usage_allowed: bool = True
 
 
-class ScenarioCreateRequest(BaseModel):
+class ScenarioCreateRequest(APIBaseModel):
     """Payload for creating a new disruption scenario."""
 
     name: str = Field(..., min_length=3, max_length=220)
@@ -36,7 +36,7 @@ class ScenarioCreateRequest(BaseModel):
     status: str = "draft"
 
 
-class ScenarioRunRequest(BaseModel):
+class ScenarioRunRequest(APIBaseModel):
     """Optional override payload when running a scenario."""
 
     duration_days: conint(ge=1) | None = None
@@ -48,7 +48,7 @@ class ScenarioRunRequest(BaseModel):
     impacted_suppliers: list[int] | None = None
 
 
-class ScenarioRefineryImpact(BaseModel):
+class ScenarioRefineryImpact(APIBaseModel):
     refinery_id: int
     name: str
     company: str
@@ -56,10 +56,6 @@ class ScenarioRefineryImpact(BaseModel):
     stress_score: float
     risk_level: str
     linked_port_name: str | None = None
-
-    class Config:
-        orm_mode = True
-
 
 class ScenarioResponse(ORMBaseSchema):
     id: int
@@ -88,7 +84,7 @@ class ScenarioResultResponse(ORMBaseSchema):
     updated_at: datetime
 
 
-class ScenarioSimulationResponse(BaseModel):
+class ScenarioSimulationResponse(APIBaseModel):
     """Frontend-friendly scenario simulation payload."""
 
     scenario: ScenarioResponse
@@ -97,7 +93,7 @@ class ScenarioSimulationResponse(BaseModel):
     mitigation_urgency_level: str
 
 
-class ScenarioListItemResponse(BaseModel):
+class ScenarioListItemResponse(APIBaseModel):
     """Scenario row with current result summary for list endpoints."""
 
     scenario: ScenarioResponse
@@ -106,11 +102,23 @@ class ScenarioListItemResponse(BaseModel):
     most_affected_refineries: list[ScenarioRefineryImpact] = Field(default_factory=list)
 
 
-class ScenarioResultsEnvelopeResponse(BaseModel):
+class ScenarioListResponse(APIBaseModel):
+    """Paginated scenario list response."""
+
+    items: list[ScenarioListItemResponse] = Field(default_factory=list)
+    total_count: int
+    limit: int
+    offset: int
+    page: int
+    pages: int
+    sort_by: str | None = None
+    sort_order: str | None = None
+
+
+class ScenarioResultsEnvelopeResponse(APIBaseModel):
     """Envelope returned by the scenario results endpoint."""
 
     scenario_id: int
     result: ScenarioResultResponse | None = None
     mitigation_urgency_level: str | None = None
     most_affected_refineries: list[ScenarioRefineryImpact] = Field(default_factory=list)
-

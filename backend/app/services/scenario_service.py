@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from datetime import datetime
+from datetime import datetime, timezone
+from math import ceil
 from typing import Any
 
 from sqlalchemy import func
@@ -20,6 +21,7 @@ from app.schemas.scenario import (
     ScenarioAssumptions,
     ScenarioCreateRequest,
     ScenarioListItemResponse,
+    ScenarioListResponse,
     ScenarioRefineryImpact,
     ScenarioResponse,
     ScenarioResultResponse,
@@ -387,8 +389,23 @@ def create_scenario(db: Session, payload: ScenarioCreateRequest, user_id: int | 
     return _scenario_response(scenario, assumptions)
 
 
-def list_scenarios(db: Session) -> list[dict[str, Any]]:
-    scenarios = db.query(Scenario).order_by(Scenario.created_at.desc()).all()
+def list_scenarios(
+    db: Session,
+    *,
+    limit: int = 50,
+    offset: int = 0,
+    status: str | None = None,
+    scenario_type: str | None = None,
+    sort_by: str = "created_at",
+    sort_order: str = "desc",
+) -> ScenarioListResponse:
+    query = db.query(Scenario)
+    if status:
+        query = query.filter(Scenario.status == status)
+    if scenario_type:
+        query = query.filter(Scenario.scenario_type == scenario_type)
+
+    scenarios = query.all()
     results = {
         row.scenario_id: row
         for row in db.query(ScenarioResult).filter(ScenarioResult.scenario_id.in_([item.id for item in scenarios])).all()
@@ -418,7 +435,41 @@ def list_scenarios(db: Session) -> list[dict[str, Any]]:
                 "most_affected_refineries": refinery_impacts,
             }
         )
-    return rows
+
+    sort_key = sort_by.lower().strip()
+
+    def _sort_value(row: dict[str, Any]) -> Any:
+        scenario_block = row.get("scenario") or {}
+        result_block = row.get("result") or {}
+        if sort_key == "name":
+            return str(scenario_block.get("name", "")).lower()
+        if sort_key == "scenario_type":
+            return str(scenario_block.get("scenario_type", "")).lower()
+        if sort_key == "status":
+            return str(scenario_block.get("status", "")).lower()
+        if sort_key == "updated_at":
+            return scenario_block.get("updated_at") or datetime.min.replace(tzinfo=timezone.utc)
+        if sort_key == "supply_loss":
+            return float(result_block.get("estimated_supply_loss_pct") or 0.0)
+        return scenario_block.get("created_at") or datetime.min.replace(tzinfo=timezone.utc)
+
+    reverse = sort_order.lower() != "asc"
+    rows.sort(key=_sort_value, reverse=reverse)
+    total_count = len(rows)
+    paged_rows = rows[offset : offset + limit]
+    page = (offset // limit) + 1 if limit > 0 else 1
+    pages = ceil(total_count / limit) if limit > 0 and total_count > 0 else 0
+
+    return ScenarioListResponse(
+        items=[ScenarioListItemResponse(**row) for row in paged_rows],
+        total_count=total_count,
+        limit=limit,
+        offset=offset,
+        page=page,
+        pages=pages,
+        sort_by=sort_by,
+        sort_order=sort_order,
+    )
 
 
 def get_scenario(db: Session, scenario_id: int) -> dict[str, Any]:
@@ -524,4 +575,3 @@ def get_scenario_results(db: Session, scenario_id: int) -> dict[str, Any]:
         "mitigation_urgency_level": payload.get("mitigation_urgency_level"),
         "most_affected_refineries": refinery_impacts,
     }
-

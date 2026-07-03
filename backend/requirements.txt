@@ -12,3 +12,4 @@ alembic==1.14.0
 orjson==3.10.12
 pytest==8.3.4
 httpx==0.28.1
+redis==5.2.1

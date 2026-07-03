@@ -1,10 +1,12 @@
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from app.schemas.common import APIBaseModel
 
 
-class DashboardKpiResponse(BaseModel):
+class DashboardKpiResponse(APIBaseModel):
     """Top-level KPI block rendered on the dashboard hero section."""
 
     average_national_risk_score: float = Field(..., description="Average risk score across national signals")
@@ -13,22 +15,14 @@ class DashboardKpiResponse(BaseModel):
     estimated_import_dependency_pct: float = Field(..., description="Estimated import dependency as a percentage")
     strategic_reserve_days_cover: float = Field(..., description="Estimated SPR days of cover")
 
-    class Config:
-        orm_mode = True
-
-
-class ChartPointResponse(BaseModel):
+class ChartPointResponse(APIBaseModel):
     """Generic chart point for frontend charting libraries."""
 
     label: str
     value: float
     meta: dict[str, Any] = Field(default_factory=dict)
 
-    class Config:
-        orm_mode = True
-
-
-class CorridorRiskResponse(BaseModel):
+class CorridorRiskResponse(APIBaseModel):
     corridor_id: int
     name: str
     risk_score: float
@@ -37,11 +31,7 @@ class CorridorRiskResponse(BaseModel):
     shipment_count: int
     contributing_factors: dict[str, Any] = Field(default_factory=dict)
 
-    class Config:
-        orm_mode = True
-
-
-class SupplierRiskResponse(BaseModel):
+class SupplierRiskResponse(APIBaseModel):
     supplier_country_id: int
     name: str
     region: str
@@ -53,11 +43,7 @@ class SupplierRiskResponse(BaseModel):
     geopolitical_risk_base: float
     contributing_factors: dict[str, Any] = Field(default_factory=dict)
 
-    class Config:
-        orm_mode = True
-
-
-class AlertResponse(BaseModel):
+class AlertResponse(APIBaseModel):
     id: int
     title: str
     event_type: str
@@ -67,21 +53,13 @@ class AlertResponse(BaseModel):
     summary: str
     impact_tags: list[str] = Field(default_factory=list)
 
-    class Config:
-        orm_mode = True
-
-
-class PriceTrendPointResponse(BaseModel):
+class PriceTrendPointResponse(APIBaseModel):
     benchmark_name: str
     timestamp: datetime
     price_usd: float
     source: str
 
-    class Config:
-        orm_mode = True
-
-
-class RefineryStressResponse(BaseModel):
+class RefineryStressResponse(APIBaseModel):
     refinery_id: int
     name: str
     company: str
@@ -95,11 +73,7 @@ class RefineryStressResponse(BaseModel):
     compatible_crude_grades: list[str] = Field(default_factory=list)
     contributing_factors: dict[str, Any] = Field(default_factory=dict)
 
-    class Config:
-        orm_mode = True
-
-
-class RecommendationResponse(BaseModel):
+class RecommendationResponse(APIBaseModel):
     id: int
     title: str
     scenario_id: int | None = None
@@ -113,12 +87,5 @@ class RecommendationResponse(BaseModel):
     generated_at: datetime
     recommendation_payload: dict[str, Any] = Field(default_factory=dict)
 
-    class Config:
-        orm_mode = True
-
-
-class DashboardSummaryResponse(BaseModel):
+class DashboardSummaryResponse(APIBaseModel):
     kpis: DashboardKpiResponse
-
-    class Config:
-        orm_mode = True
