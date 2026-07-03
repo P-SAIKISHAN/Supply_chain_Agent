@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="color-scheme" content="dark" />
   <title>Map | Energy Resilience Platform</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="../assets/css/main.css" />
   <link rel="stylesheet" href="../assets/css/components.css" />
 </head>
@@ -40,13 +41,13 @@
           <p class="subtitle">Designed for Leaflet or Mapbox layers with risk overlays and disruption markers.</p>
         </div>
         <div class="topbar__actions">
-          <button class="btn btn-secondary" type="button">Toggle layers</button>
-          <button class="btn btn-primary" type="button">Refresh map</button>
+          <button class="btn btn-secondary" type="button" data-map-fit>Fit view</button>
+          <button class="btn btn-primary" type="button" data-map-refresh>Refresh map</button>
         </div>
       </header>
 
       <main class="page-content page-content--map">
-        <section class="panel panel--map">
+        <section class="panel">
           <div class="panel__header">
             <div>
               <p class="eyebrow">Map canvas</p>
@@ -54,10 +55,58 @@
             </div>
             <span class="badge">GeoJSON ready</span>
           </div>
-          <div class="map-canvas">
-            <div class="map-canvas__overlay">
-              <span>Map render area</span>
-              <strong>Supplier countries, shipping corridors, ports, refineries, shipments</strong>
+          <div class="map-summary-grid">
+            <div class="map-summary-card">
+              <span>Suppliers</span>
+              <strong id="map-supplier-count">--</strong>
+            </div>
+            <div class="map-summary-card">
+              <span>Corridors</span>
+              <strong id="map-corridor-count">--</strong>
+            </div>
+            <div class="map-summary-card">
+              <span>Ports</span>
+              <strong id="map-port-count">--</strong>
+            </div>
+            <div class="map-summary-card">
+              <span>Refineries</span>
+              <strong id="map-refinery-count">--</strong>
+            </div>
+            <div class="map-summary-card">
+              <span>Shipments</span>
+              <strong id="map-shipment-count">--</strong>
+            </div>
+            <div class="map-summary-card">
+              <span>Hotspots</span>
+              <strong id="map-hotspot-count">--</strong>
+            </div>
+          </div>
+
+          <div class="map-shell">
+            <div class="map-toolbar">
+              <span class="map-toolbar__status" id="map-status">Loading map data...</span>
+              <span class="badge badge--warning">Leaflet layers</span>
+            </div>
+            <div class="map-viewport">
+              <div id="map-view" class="leaflet-map" aria-label="Energy supply chain map"></div>
+              <div class="map-empty-state" id="map-empty-state">
+                <div class="panel state-card state-card--loading">
+                  <strong>Preparing map</strong>
+                  <p>Loading supplier, corridor, port, refinery, shipment, and hotspot layers.</p>
+                </div>
+              </div>
+              <div class="map-selection" id="map-selection">
+                <div class="panel map-detail-card">
+                  <div class="panel__header">
+                    <div>
+                      <p class="eyebrow">Selection</p>
+                      <h2>No feature selected</h2>
+                    </div>
+                    <span class="badge">Inspect details</span>
+                  </div>
+                  <p>Select a port, refinery, shipment route, corridor, or hotspot to inspect the route intelligence.</p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -65,30 +114,66 @@
         <section class="panel">
           <div class="panel__header">
             <div>
-              <p class="eyebrow">Legend</p>
-              <h2>Layers and hotspots</h2>
+              <p class="eyebrow">Layers</p>
+              <h2>Controls and hotspots</h2>
             </div>
             <span class="badge badge--critical">High risk zones</span>
           </div>
-          <div class="legend-list">
-            <div class="legend-item"><span class="legend-swatch legend-swatch--corridor"></span> Shipping corridor</div>
-            <div class="legend-item"><span class="legend-swatch legend-swatch--refinery"></span> Refinery</div>
-            <div class="legend-item"><span class="legend-swatch legend-swatch--port"></span> Port</div>
-            <div class="legend-item"><span class="legend-swatch legend-swatch--shipment"></span> Shipment</div>
+          <div class="map-layer-panel">
+            <div class="map-toggle-list">
+              <label class="map-toggle">
+                <span>Supplier countries</span>
+                <small data-map-count="suppliers">--</small>
+                <input type="checkbox" checked data-map-layer="suppliers" />
+              </label>
+              <label class="map-toggle">
+                <span>Shipping corridors</span>
+                <small data-map-count="corridors">--</small>
+                <input type="checkbox" checked data-map-layer="corridors" />
+              </label>
+              <label class="map-toggle">
+                <span>Ports</span>
+                <small data-map-count="ports">--</small>
+                <input type="checkbox" checked data-map-layer="ports" />
+              </label>
+              <label class="map-toggle">
+                <span>Refineries</span>
+                <small data-map-count="refineries">--</small>
+                <input type="checkbox" checked data-map-layer="refineries" />
+              </label>
+              <label class="map-toggle">
+                <span>Shipment routes</span>
+                <small data-map-count="shipments">--</small>
+                <input type="checkbox" checked data-map-layer="shipments" />
+              </label>
+              <label class="map-toggle">
+                <span>Risk hotspots</span>
+                <small data-map-count="riskHotspots">--</small>
+                <input type="checkbox" checked data-map-layer="riskHotspots" />
+              </label>
+            </div>
+
+            <div class="legend-list">
+              <div class="legend-item"><span class="legend-swatch legend-swatch--corridor"></span> Shipping corridor</div>
+              <div class="legend-item"><span class="legend-swatch legend-swatch--refinery"></span> Refinery</div>
+              <div class="legend-item"><span class="legend-swatch legend-swatch--port"></span> Port</div>
+              <div class="legend-item"><span class="legend-swatch legend-swatch--shipment"></span> Shipment</div>
+            </div>
           </div>
-          <div class="hotspot-list">
-            <article class="hotspot-card">
-              <strong>Strait of Hormuz</strong>
-              <p>Critical route exposure and active navigation alert.</p>
-            </article>
-            <article class="hotspot-card">
-              <strong>Red Sea</strong>
-              <p>Recurring attack risk and route diversion pressure.</p>
-            </article>
-            <article class="hotspot-card">
-              <strong>Vadinar / Jamnagar cluster</strong>
-              <p>Refinery concentration increases near-term operational sensitivity.</p>
-            </article>
+
+          <div class="panel__divider"></div>
+          <div class="panel__header">
+            <div>
+              <p class="eyebrow">Hotspots</p>
+              <h2>Highest risk signals</h2>
+            </div>
+            <span class="badge badge--success" id="map-hotspot-total">--</span>
+          </div>
+          <div id="map-hotspot-list" class="map-hotspot-list">
+            <div class="panel state-card state-card--loading">
+              <strong>Loading hotspots</strong>
+              <p>Waiting for the geospatial data layers to load.</p>
+            </div>
           </div>
         </section>
       </main>
@@ -97,6 +182,7 @@
 
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/auth.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="../assets/js/map.js"></script>
 </body>
 </html>
-
