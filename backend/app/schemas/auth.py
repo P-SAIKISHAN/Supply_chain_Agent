@@ -1,16 +1,18 @@
 from datetime import datetime
+import re
 from typing import Literal
 
-from pydantic import BaseModel, EmailStr, Field, validator
+from pydantic import BaseModel, Field, validator
 
 UserRole = Literal["admin", "analyst", "procurement", "policymaker"]
+EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 class UserCreate(BaseModel):
     """Payload used to register a new user."""
 
     full_name: str = Field(min_length=2, max_length=150)
-    email: EmailStr
+    email: str = Field(min_length=5, max_length=254)
     password: str = Field(min_length=8, max_length=128)
     role: UserRole = "analyst"
 
@@ -19,19 +21,25 @@ class UserCreate(BaseModel):
         return value.strip()
 
     @validator("email")
-    def normalize_email(cls, value: EmailStr) -> str:
-        return str(value).strip().lower()
+    def normalize_email(cls, value: str) -> str:
+        normalized = value.strip().lower()
+        if not EMAIL_PATTERN.match(normalized):
+            raise ValueError("Invalid email address")
+        return normalized
 
 
 class LoginRequest(BaseModel):
     """Payload used to authenticate an existing user."""
 
-    email: EmailStr
+    email: str = Field(min_length=5, max_length=254)
     password: str = Field(min_length=1, max_length=128)
 
     @validator("email")
-    def normalize_email(cls, value: EmailStr) -> str:
-        return str(value).strip().lower()
+    def normalize_email(cls, value: str) -> str:
+        normalized = value.strip().lower()
+        if not EMAIL_PATTERN.match(normalized):
+            raise ValueError("Invalid email address")
+        return normalized
 
 
 class CurrentUserResponse(BaseModel):
@@ -39,7 +47,7 @@ class CurrentUserResponse(BaseModel):
 
     id: int
     full_name: str
-    email: EmailStr
+    email: str
     role: UserRole
     is_active: bool
     created_at: datetime

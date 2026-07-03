@@ -32,6 +32,15 @@ from app.schemas.procurement import (
     ProcurementRecommendationResponse,
     ProcurementScope,
 )
+from app.schemas.reports import (
+    ExplanationRequest,
+    KnowledgeChunkResponse,
+    KnowledgeDocumentCreateRequest,
+    KnowledgeDocumentResponse,
+    ReportResponse,
+    RiskBriefResponse,
+    SourceCitationResponse,
+)
 from app.schemas.map import GeoJSONFeature, GeoJSONFeatureCollection, GeoJSONGeometry, MapNetworkResponse
 from app.schemas.spr import (
     SPRDailyReleaseResponse,
@@ -59,9 +68,14 @@ __all__ = [
     "GeoJSONFeatureCollection",
     "GeoJSONGeometry",
     "MapNetworkResponse",
+    "ExplanationRequest",
+    "KnowledgeChunkResponse",
+    "KnowledgeDocumentCreateRequest",
+    "KnowledgeDocumentResponse",
     "RefineryResponse",
     "RiskScoreResponse",
     "SanctionsEventResponse",
+    "ReportResponse",
     "ScenarioAssumptions",
     "ScenarioCreateRequest",
     "ScenarioListItemResponse",
@@ -81,5 +95,7 @@ __all__ = [
     "SPRRefineryAllocationResponse",
     "SupplierCountryResponse",
     "TokenResponse",
+    "SourceCitationResponse",
+    "RiskBriefResponse",
     "UserCreate",
 ]

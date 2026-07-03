@@ -3,6 +3,8 @@
 from app.models.audit_log import AuditLog
 from app.models.commodity_price import CommodityPrice
 from app.models.geopolitical_event import GeopoliticalEvent
+from app.models.intelligence_chunk import IntelligenceChunk
+from app.models.intelligence_document import IntelligenceDocument
 from app.models.port import Port
 from app.models.recommendation import ProcurementRecommendation, SPRPlan
 from app.models.refinery import Refinery
@@ -18,6 +20,8 @@ __all__ = [
     "AuditLog",
     "CommodityPrice",
     "GeopoliticalEvent",
+    "IntelligenceChunk",
+    "IntelligenceDocument",
     "Port",
     "ProcurementRecommendation",
     "Refinery",

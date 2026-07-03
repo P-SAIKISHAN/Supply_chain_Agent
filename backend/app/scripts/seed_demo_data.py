@@ -24,6 +24,8 @@ from app.models import (
     SupplierCountry,
     User,
 )
+from app.schemas.reports import KnowledgeDocumentCreateRequest
+from app.services.rag_service import ingest_intelligence_document
 
 UTC = timezone.utc
 
@@ -499,6 +501,59 @@ def seed_commodity_prices(db: Session) -> list[CommodityPrice]:
     return seeded
 
 
+def seed_knowledge_documents(db: Session) -> list[dict[str, Any]]:
+    documents = [
+        {
+            "title": "Hormuz transit risk note",
+            "source_name": "demo-intel",
+            "source_type": "analyst_note",
+            "summary": "Assesses the sensitivity of Indian imports to Strait of Hormuz disruption.",
+            "content_text": (
+                "Indian crude import flows remain highly exposed to the Strait of Hormuz. "
+                "A temporary closure or military escalation would likely force rapid rerouting via "
+                "the Cape of Good Hope, raise voyage times, increase freight costs, and tighten "
+                "prompt availability for coastal refineries. Tactical stock drawdown can cushion "
+                "the first wave of supply loss, but procurement teams should pre-negotiate alternate "
+                "Middle East and Atlantic cargoes."
+            ),
+            "metadata_json": {"topic": "hormuz", "priority": "high", "tags": ["corridor", "shipping", "india"]},
+        },
+        {
+            "title": "Sanctions and shadow fleet briefing",
+            "source_name": "demo-intel",
+            "source_type": "analyst_note",
+            "summary": "Summarizes how sanctions escalation can affect tanker availability and finance.",
+            "content_text": (
+                "Expanded sanctions on Russian and Iranian trading networks can reduce tanker availability, "
+                "increase insurance costs, and create financing delays for liftings. The main operational risk "
+                "is not only the loss of physical barrels but also slower settlement cycles, lower route optionality, "
+                "and compliance-driven shipment reclassification. Diversified supplier baskets and clearer sanctions screening "
+                "reduce execution risk."
+            ),
+            "metadata_json": {"topic": "sanctions", "priority": "high", "tags": ["sanctions", "compliance", "shipping"]},
+        },
+        {
+            "title": "Refinery compatibility and crude slate note",
+            "source_name": "demo-intel",
+            "source_type": "analyst_note",
+            "summary": "Notes which Indian refineries can flex between sour and sweet grades.",
+            "content_text": (
+                "Refineries with broader crude compatibility are better positioned to absorb disruptions by switching "
+                "between Arab Light, Basrah Light, WTI, and similar grades. Complexity and port congestion affect how "
+                "quickly the system can translate alternate procurement into throughput stability. Strategic reserves are "
+                "most valuable when allocated to refineries that face immediate feedstock constraints and cannot quickly "
+                "reshape slates."
+            ),
+            "metadata_json": {"topic": "refining", "priority": "medium", "tags": ["refinery", "compatibility", "spr"]},
+        },
+    ]
+
+    seeded: list[dict[str, Any]] = []
+    for item in documents:
+        seeded.append(ingest_intelligence_document(db, KnowledgeDocumentCreateRequest(**item)))
+    return seeded
+
+
 def seed_risk_scores(
     db: Session,
     countries: dict[str, SupplierCountry],
@@ -715,6 +770,7 @@ def seed_demo_data(create_tables: bool = True) -> None:
         seed_geopolitical_events(db)
         seed_sanctions_events(db)
         seed_commodity_prices(db)
+        seed_knowledge_documents(db)
         seed_risk_scores(db, countries, corridors, refineries)
         seed_scenarios(db, users["admin"], refineries)
 
