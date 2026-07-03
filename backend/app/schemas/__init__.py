@@ -6,13 +6,11 @@ from app.schemas.domain import (
     CommodityPriceResponse,
     GeopoliticalEventResponse,
     PortResponse,
-    ProcurementRecommendationResponse,
     RefineryResponse,
     RiskScoreResponse,
     SanctionsEventResponse,
     ShipmentResponse,
     ShippingCorridorResponse,
-    SPRPlanResponse,
     SupplierCountryResponse,
 )
 from app.schemas.scenario import (
@@ -33,6 +31,14 @@ from app.schemas.procurement import (
     ProcurementRecommendationListResponse,
     ProcurementRecommendationResponse,
     ProcurementScope,
+)
+from app.schemas.spr import (
+    SPRDailyReleaseResponse,
+    SPRPlanListResponse,
+    SPRPlanResponse,
+    SPRRefineryAllocationResponse,
+    SPROptimizeRequest,
+    SPROptimizeResponse,
 )
 
 __all__ = [
@@ -62,7 +68,12 @@ __all__ = [
     "ScenarioSimulationResponse",
     "ShipmentResponse",
     "ShippingCorridorResponse",
+    "SPROptimizeRequest",
+    "SPROptimizeResponse",
+    "SPRDailyReleaseResponse",
+    "SPRPlanListResponse",
     "SPRPlanResponse",
+    "SPRRefineryAllocationResponse",
     "SupplierCountryResponse",
     "TokenResponse",
     "UserCreate",
