@@ -1,6 +1,7 @@
 """Pydantic schemas for the backend application."""
 
 from app.schemas.auth import CurrentUserResponse, LoginRequest, TokenResponse, UserCreate
+from app.schemas.admin import AuditLogItemResponse, AuditLogListResponse, SeedDemoResponse, SystemSummaryResponse
 from app.schemas.domain import (
     AuditLogResponse,
     CommodityPriceResponse,
@@ -53,6 +54,8 @@ from app.schemas.spr import (
 
 __all__ = [
     "AuditLogResponse",
+    "AuditLogItemResponse",
+    "AuditLogListResponse",
     "CommodityPriceResponse",
     "CurrentUserResponse",
     "GeopoliticalEventResponse",
@@ -93,9 +96,11 @@ __all__ = [
     "SPRPlanListResponse",
     "SPRPlanResponse",
     "SPRRefineryAllocationResponse",
+    "SeedDemoResponse",
     "SupplierCountryResponse",
     "TokenResponse",
     "SourceCitationResponse",
     "RiskBriefResponse",
+    "SystemSummaryResponse",
     "UserCreate",
 ]

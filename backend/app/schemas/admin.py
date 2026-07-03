@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field, validator
@@ -64,3 +65,35 @@ class JobRunResponse(BaseModel):
     status: str
     result: dict = Field(default_factory=dict)
     error: str | None = None
+
+
+class AuditLogItemResponse(BaseModel):
+    id: int
+    user_id: int | None = None
+    user_email: str | None = None
+    action: str
+    entity_type: str
+    entity_id: str
+    metadata_json: dict = Field(default_factory=dict)
+    created_at: datetime
+    updated_at: datetime
+
+
+class AuditLogListResponse(BaseModel):
+    items: list[AuditLogItemResponse] = Field(default_factory=list)
+    total_count: int
+    limit: int
+    offset: int
+
+
+class SystemSummaryResponse(BaseModel):
+    generated_at: str
+    counts: dict[str, int]
+    latest_activity: dict[str, str | None]
+    scheduler: dict[str, object]
+
+
+class SeedDemoResponse(BaseModel):
+    message: str
+    seeded_at: str
+    summary: SystemSummaryResponse

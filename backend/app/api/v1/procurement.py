@@ -10,6 +10,7 @@ from app.schemas.procurement import (
     ProcurementRecommendationListResponse,
     ProcurementRecommendationResponse,
 )
+from app.services.audit_service import safe_record_audit_log
 from app.services.procurement_service import (
     generate_procurement_recommendations,
     get_procurement_recommendation,
@@ -26,7 +27,22 @@ def recommend(
     current_user: User = Depends(get_current_user),
 ) -> dict:
     try:
-        return generate_procurement_recommendations(db, payload)
+        result = generate_procurement_recommendations(db, payload)
+        safe_record_audit_log(
+            db,
+            user_id=current_user.id,
+            action="recommendation_generated",
+            entity_type="procurement_batch",
+            entity_id=f"{payload.target_scope}:{payload.scenario_id or payload.refinery_id or 'national'}",
+            metadata={
+                "target_scope": payload.target_scope,
+                "scenario_id": payload.scenario_id,
+                "refinery_id": payload.refinery_id,
+                "generated_count": result.get("generated_count", 0),
+            },
+            commit=True,
+        )
+        return result
     except KeyError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     except ValueError as exc:
@@ -59,4 +75,3 @@ def recommendation(
         return get_procurement_recommendation(db, recommendation_id)
     except KeyError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
-

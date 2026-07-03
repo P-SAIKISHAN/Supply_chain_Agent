@@ -5,6 +5,7 @@ from app.api.deps import get_current_user
 from app.core.database import get_db
 from app.models.user import User
 from app.schemas.auth import CurrentUserResponse, LoginRequest, TokenResponse, UserCreate
+from app.services.audit_service import safe_record_audit_log, user_login_audit_metadata
 from app.services.auth_service import (
     AuthenticationError,
     UserAlreadyExistsError,
@@ -51,7 +52,17 @@ def login(credentials: LoginRequest, db: Session = Depends(get_db)) -> TokenResp
             headers={"WWW-Authenticate": "Bearer"},
         ) from exc
 
-    return build_token_response(user)
+    token_response = build_token_response(user)
+    safe_record_audit_log(
+        db,
+        user_id=user.id,
+        action="user_login",
+        entity_type="user",
+        entity_id=str(user.id),
+        metadata=user_login_audit_metadata(user),
+        commit=True,
+    )
+    return token_response
 
 
 @router.get("/me", response_model=CurrentUserResponse, summary="Get current user")

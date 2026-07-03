@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
 from typing import Iterable
 
 from sqlalchemy.orm import Session
@@ -12,7 +11,7 @@ from app.ingestion.news_ingestor import NewsIngestor
 from app.ingestion.prices_ingestor import PricesIngestor
 from app.ingestion.refinery_ingestor import RefineryIngestor
 from app.ingestion.sanctions_ingestor import SanctionsIngestor
-from app.models.audit_log import AuditLog
+from app.services.audit_service import safe_record_audit_log
 
 logger = logging.getLogger(__name__)
 
@@ -23,18 +22,6 @@ INGESTOR_REGISTRY = {
     "prices": PricesIngestor,
     "refinery": RefineryIngestor,
 }
-
-
-def _record_audit(db: Session, user_id: int | None, action: str, entity_type: str, entity_id: str, metadata: dict) -> None:
-    db.add(
-        AuditLog(
-            user_id=user_id,
-            action=action,
-            entity_type=entity_type,
-            entity_id=entity_id,
-            metadata_json=metadata,
-        )
-    )
 
 
 def run_ingestion(
@@ -68,21 +55,21 @@ def run_ingestion(
                     "finished_at": outcome["finished_at"].isoformat(),
                 }
             )
-            _record_audit(
+            safe_record_audit_log(
                 db,
-                user_id,
-                "ingestion_run",
-                "ingestion_source",
-                source_name,
-                {
+                user_id=user_id,
+                action="ingestion_run",
+                entity_type="ingestion_source",
+                entity_id=source_name,
+                metadata={
                     "status": "success",
                     "demo_mode": demo_mode,
                     "fetched_count": outcome["fetched_count"],
                     "normalized_count": outcome["normalized_count"],
                     "upserted_count": outcome["upserted_count"],
                 },
+                commit=True,
             )
-            db.commit()
             success_count += 1
             logger.info(
                 "ingestion_source_complete",
@@ -107,15 +94,15 @@ def run_ingestion(
             }
             results.append(error_payload)
             try:
-                _record_audit(
+                safe_record_audit_log(
                     db,
-                    user_id,
-                    "ingestion_error",
-                    "ingestion_source",
-                    source_name,
-                    {"status": "failed", "error": str(exc), "demo_mode": demo_mode},
+                    user_id=user_id,
+                    action="ingestion_error",
+                    entity_type="ingestion_source",
+                    entity_id=source_name,
+                    metadata={"status": "failed", "error": str(exc), "demo_mode": demo_mode},
+                    commit=True,
                 )
-                db.commit()
             except Exception:
                 db.rollback()
             logger.exception(
@@ -132,4 +119,3 @@ def run_ingestion(
         "success_count": success_count,
         "failure_count": failure_count,
     }
-

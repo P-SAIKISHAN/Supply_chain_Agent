@@ -12,6 +12,7 @@ from app.schemas.scenario import (
     ScenarioRunRequest,
     ScenarioSimulationResponse,
 )
+from app.services.audit_service import safe_record_audit_log
 from app.services.scenario_service import (
     create_scenario,
     get_scenario,
@@ -29,7 +30,21 @@ def create(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> dict:
-    return create_scenario(db, payload, user_id=current_user.id)
+    result = create_scenario(db, payload, user_id=current_user.id)
+    safe_record_audit_log(
+        db,
+        user_id=current_user.id,
+        action="scenario_created",
+        entity_type="scenario",
+        entity_id=str(result["scenario"]["id"]),
+        metadata={
+            "scenario_name": result["scenario"]["name"],
+            "scenario_type": result["scenario"]["scenario_type"],
+            "status": result["scenario"]["status"],
+        },
+        commit=True,
+    )
+    return result
 
 
 @router.get("", response_model=list[ScenarioListItemResponse], summary="List disruption scenarios")
@@ -60,7 +75,21 @@ def run(
     current_user: User = Depends(get_current_user),
 ) -> dict:
     try:
-        return run_scenario(db, scenario_id, payload)
+        result = run_scenario(db, scenario_id, payload)
+        safe_record_audit_log(
+            db,
+            user_id=current_user.id,
+            action="scenario_executed",
+            entity_type="scenario",
+            entity_id=str(scenario_id),
+            metadata={
+                "scenario_name": result["scenario"]["name"],
+                "mitigation_urgency_level": result.get("mitigation_urgency_level"),
+                "supply_loss_pct": result["result"]["estimated_supply_loss_pct"],
+            },
+            commit=True,
+        )
+        return result
     except KeyError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
 
@@ -72,4 +101,3 @@ def results(
     current_user: User = Depends(get_current_user),
 ) -> dict:
     return get_scenario_results(db, scenario_id)
-

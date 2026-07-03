@@ -10,6 +10,7 @@ from app.schemas.spr import (
     SPROptimizeRequest,
     SPROptimizeResponse,
 )
+from app.services.audit_service import safe_record_audit_log
 from app.services.spr_service import get_spr_plan, list_spr_plans, optimize_spr_plan
 
 router = APIRouter(prefix="/spr", tags=["spr"])
@@ -22,7 +23,22 @@ def optimize(
     current_user: User = Depends(get_current_user),
 ) -> dict:
     try:
-        return optimize_spr_plan(db, payload)
+        result = optimize_spr_plan(db, payload)
+        safe_record_audit_log(
+            db,
+            user_id=current_user.id,
+            action="spr_optimized",
+            entity_type="spr_plan",
+            entity_id=str(result["plan"].id),
+            metadata={
+                "scenario_id": payload.scenario_id,
+                "target_scope": payload.target_scope,
+                "total_drawdown_bbl": result["plan"].total_drawdown_bbl,
+                "drawdown_days": result["plan"].drawdown_days,
+            },
+            commit=True,
+        )
+        return result
     except KeyError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     except ValueError as exc:
@@ -49,4 +65,3 @@ def plan(
         return get_spr_plan(db, plan_id)
     except KeyError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
-
