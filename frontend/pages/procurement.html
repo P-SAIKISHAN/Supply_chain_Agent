@@ -37,11 +37,11 @@
         <div>
           <p class="eyebrow">Procurement orchestrator</p>
           <h1>Alternate supply planning</h1>
-          <p class="subtitle">Compare route risk, crude compatibility, cost, delivery, and sanctions safety.</p>
+          <p class="subtitle">Generate recommendations for national, scenario-specific, or refinery-specific response.</p>
         </div>
         <div class="topbar__actions">
-          <button class="btn btn-secondary" type="button">Filter</button>
-          <button class="btn btn-primary" type="button">Generate ranking</button>
+          <button class="btn btn-secondary" type="button" data-procurement-refresh>Refresh list</button>
+          <button class="btn btn-primary" type="button" data-procurement-generate>Generate ranking</button>
         </div>
       </header>
 
@@ -50,40 +50,55 @@
           <div class="panel__header">
             <div>
               <p class="eyebrow">Recommendation settings</p>
-              <h2>Scope and constraints</h2>
+              <h2>Scope and filters</h2>
             </div>
             <span class="badge">Weighted score</span>
           </div>
-          <div class="form-grid">
+
+          <form id="procurement-form" class="form-grid">
             <label class="field">
               <span>Target scope</span>
-              <select>
-                <option>National</option>
-                <option>Refinery</option>
-                <option>Scenario</option>
+              <select id="procurement-scope">
+                <option value="national">Current live risk</option>
+                <option value="scenario">By scenario</option>
+                <option value="refinery">By refinery</option>
               </select>
             </label>
             <label class="field">
-              <span>Refinery</span>
-              <input type="text" value="Jamnagar Refinery" />
+              <span>Scenario ID</span>
+              <input id="procurement-scenario-id" type="number" min="1" placeholder="e.g. 1" />
             </label>
             <label class="field">
-              <span>Scenario</span>
-              <input type="text" value="Hormuz closure - 14 day disruption" />
+              <span>Refinery ID</span>
+              <input id="procurement-refinery-id" type="number" min="1" placeholder="e.g. 1" />
             </label>
             <label class="field">
               <span>Top recommendations</span>
-              <input type="number" value="5" />
+              <input id="procurement-top-n" type="number" min="1" max="20" value="5" />
             </label>
             <label class="field">
               <span>Candidate suppliers limit</span>
-              <input type="number" value="8" />
+              <input id="procurement-supplier-limit" type="number" min="1" max="20" value="8" />
             </label>
             <label class="field">
               <span>Candidate corridors limit</span>
-              <input type="number" value="3" />
+              <input id="procurement-corridor-limit" type="number" min="1" max="10" value="3" />
             </label>
-          </div>
+            <label class="field">
+              <span>Risk level filter</span>
+              <select id="procurement-risk-filter">
+                <option value="">All</option>
+                <option value="critical">Critical</option>
+                <option value="high">High</option>
+                <option value="moderate">Moderate</option>
+                <option value="low">Low</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Supplier region filter</span>
+              <input id="procurement-region-filter" type="text" placeholder="Middle East" />
+            </label>
+          </form>
 
           <div class="panel__divider"></div>
           <div class="score-formula">
@@ -94,38 +109,26 @@
         <section class="panel">
           <div class="panel__header">
             <div>
-              <p class="eyebrow">Top ranked options</p>
+              <p class="eyebrow">Ranked options</p>
               <h2>Executable alternatives</h2>
             </div>
-            <span class="badge badge--success">Ranked list</span>
+            <span class="badge badge--success" id="procurement-count-badge">Loading</span>
           </div>
-          <div class="ranking-list">
-            <article class="ranking-card">
-              <div class="ranking-card__head">
-                <strong>1. UAE to Jamnagar via Cape of Good Hope</strong>
-                <span class="pill pill--high">86.4</span>
-              </div>
-              <p>Low sanctions risk, strong crude compatibility, manageable cost increase.</p>
-            </article>
-            <article class="ranking-card">
-              <div class="ranking-card__head">
-                <strong>2. Saudi Arabia to Paradip via Red Sea diversion</strong>
-                <span class="pill pill--moderate">79.1</span>
-              </div>
-              <p>Good compatibility and faster recovery once corridor volatility eases.</p>
-            </article>
-            <article class="ranking-card">
-              <div class="ranking-card__head">
-                <strong>3. Nigeria to Mangalore via Cape route</strong>
-                <span class="pill pill--moderate">74.6</span>
-              </div>
-              <p>Longer transit, but broadens geographic diversification.</p>
-            </article>
-          </div>
+
+          <div id="procurement-list" class="ranking-list"></div>
+
+          <div class="panel__divider"></div>
+
           <div class="mini-table">
-            <div class="mini-table__row"><span>Expected cost delta</span><strong>+4.8%</strong></div>
-            <div class="mini-table__row"><span>Risk reduction</span><strong>0.71</strong></div>
-            <div class="mini-table__row"><span>Delivery delay</span><strong>+6.2 days</strong></div>
+            <div class="mini-table__row"><span>Expected cost delta</span><strong id="procurement-cost-delta">--</strong></div>
+            <div class="mini-table__row"><span>Risk reduction</span><strong id="procurement-risk-reduction">--</strong></div>
+            <div class="mini-table__row"><span>Delivery feasibility</span><strong id="procurement-delivery-feasibility">--</strong></div>
+          </div>
+
+          <div id="procurement-details" class="procurement-details">
+            <div class="chart-placeholder chart-placeholder--tall">
+              <div class="chart-placeholder__label">Select a recommendation to view rationale</div>
+            </div>
           </div>
         </section>
       </main>
@@ -134,6 +137,7 @@
 
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/procurement.js"></script>
 </body>
 </html>
 
