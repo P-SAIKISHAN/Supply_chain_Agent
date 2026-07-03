@@ -62,6 +62,98 @@
     }
   }
 
+  function setButtonBusy(button, busy, label) {
+    if (!button) {
+      return;
+    }
+    button.disabled = busy;
+    if (label) {
+      button.textContent = label;
+    }
+  }
+
+  function activeRecommendationId() {
+    return state.selectedId || state.recommendations[0]?.id || null;
+  }
+
+  async function fetchRecommendationReport(recommendationId) {
+    return API.postJson(`/reports/procurement-summary/${recommendationId}`, null);
+  }
+
+  function reportFileName(report, recommendationId) {
+    const datePart = report?.generated_at ? new Date(report.generated_at).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+    const titlePart = window.EnergyReports ? window.EnergyReports.sanitizeFileName(report?.title || `recommendation-${recommendationId}`) : `recommendation-${recommendationId}`;
+    return `${titlePart}-${datePart}.json`;
+  }
+
+  async function downloadRecommendationReport() {
+    const recommendationId = activeRecommendationId();
+    if (!recommendationId) {
+      window.alert("Select or generate a recommendation first.");
+      return;
+    }
+    const button = qs("[data-procurement-report-download]");
+    const originalLabel = button ? button.textContent : "";
+    try {
+      setButtonBusy(button, true, "Downloading...");
+      const report = await fetchRecommendationReport(recommendationId);
+      if (window.EnergyReports) {
+        window.EnergyReports.downloadJsonReport(reportFileName(report, recommendationId), report);
+      }
+    } catch (error) {
+      console.error("Failed to download procurement report", error);
+      window.alert(error.message || "Unable to download procurement report.");
+    } finally {
+      setButtonBusy(button, false, originalLabel || "Download JSON");
+    }
+  }
+
+  async function printRecommendationReport() {
+    const recommendationId = activeRecommendationId();
+    if (!recommendationId) {
+      window.alert("Select or generate a recommendation first.");
+      return;
+    }
+    const button = qs("[data-procurement-report-print]");
+    const originalLabel = button ? button.textContent : "";
+    let printWindow = null;
+    try {
+      setButtonBusy(button, true, "Preparing...");
+      printWindow = window.EnergyReports
+        ? window.EnergyReports.openPrintWindow({
+            title: "Procurement Summary",
+            loadingMessage: "Loading procurement summary...",
+          })
+        : window.open("", "_blank", "noopener,noreferrer");
+      if (!printWindow) {
+        throw new Error("Popup blocked. Please allow popups for printable reports.");
+      }
+      const report = await fetchRecommendationReport(recommendationId);
+      if (window.EnergyReports) {
+        window.EnergyReports.renderPrintWindow(printWindow, report, {
+          title: report.title || "Procurement Summary",
+          subtitle: "Printable procurement recommendation summary",
+        });
+      }
+      window.setTimeout(() => {
+        try {
+          printWindow.focus();
+          printWindow.print();
+        } catch (error) {
+          console.warn("Print dialog unavailable", error);
+        }
+      }, 250);
+    } catch (error) {
+      console.error("Failed to print procurement report", error);
+      if (printWindow && !printWindow.closed) {
+        printWindow.close();
+      }
+      window.alert(error.message || "Unable to open printable procurement report.");
+    } finally {
+      setButtonBusy(button, false, originalLabel || "Print summary");
+    }
+  }
+
   function getFilters() {
     return {
       target_scope: qs("#procurement-scope").value,
@@ -265,6 +357,8 @@
     const form = qs("#procurement-form");
     const refreshButton = qs("[data-procurement-refresh]");
     const generateButton = qs("[data-procurement-generate]");
+    const downloadButton = qs("[data-procurement-report-download]");
+    const printButton = qs("[data-procurement-report-print]");
 
     const handleGenerate = async (event) => {
       if (event) event.preventDefault();
@@ -276,6 +370,12 @@
     }
     if (refreshButton) {
       refreshButton.addEventListener("click", () => loadRecommendations());
+    }
+    if (downloadButton) {
+      downloadButton.addEventListener("click", downloadRecommendationReport);
+    }
+    if (printButton) {
+      printButton.addEventListener("click", printRecommendationReport);
     }
     if (generateButton) {
       generateButton.addEventListener("click", handleGenerate);
@@ -354,4 +454,3 @@
     loadRecommendations();
   });
 })(window, document);
-

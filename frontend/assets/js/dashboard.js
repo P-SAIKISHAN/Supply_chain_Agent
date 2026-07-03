@@ -429,6 +429,83 @@
     });
   }
 
+  function setButtonBusy(button, busy, label) {
+    if (!button) {
+      return;
+    }
+    button.disabled = busy;
+    if (label) {
+      button.textContent = label;
+    }
+  }
+
+  async function fetchDailyRiskBrief() {
+    return API.getJson("/reports/risk-brief?use_llm=false&top_k_notes=5");
+  }
+
+  function riskBriefFileName(report) {
+    const datePart = report?.generated_at ? new Date(report.generated_at).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+    return `daily-risk-brief-${datePart}.json`;
+  }
+
+  async function downloadDailyRiskBrief() {
+    const button = qs("[data-dashboard-report-download]");
+    const originalLabel = button ? button.textContent : "";
+    try {
+      setButtonBusy(button, true, "Downloading...");
+      const report = await fetchDailyRiskBrief();
+      if (window.EnergyReports) {
+        window.EnergyReports.downloadJsonReport(riskBriefFileName(report), report);
+      }
+    } catch (error) {
+      console.error("Failed to download risk brief", error);
+      window.alert(error.message || "Unable to download risk brief.");
+    } finally {
+      setButtonBusy(button, false, originalLabel || "Download JSON");
+    }
+  }
+
+  async function printDailyRiskBrief() {
+    const button = qs("[data-dashboard-report-print]");
+    const originalLabel = button ? button.textContent : "";
+    let printWindow = null;
+    try {
+      setButtonBusy(button, true, "Preparing...");
+      printWindow = window.EnergyReports
+        ? window.EnergyReports.openPrintWindow({
+            title: "Daily Risk Brief",
+            loadingMessage: "Loading daily risk brief...",
+          })
+        : window.open("", "_blank", "noopener,noreferrer");
+      if (!printWindow) {
+        throw new Error("Popup blocked. Please allow popups for printable reports.");
+      }
+      const report = await fetchDailyRiskBrief();
+      if (window.EnergyReports) {
+        window.EnergyReports.renderPrintWindow(printWindow, report, {
+          title: "Daily Risk Brief",
+          subtitle: "Printable daily risk brief from the latest national dashboard state",
+        });
+      }
+      window.setTimeout(() => {
+        try {
+          printWindow.focus();
+          printWindow.print();
+        } catch (error) {
+          console.warn("Print dialog unavailable", error);
+        }
+      }, 250);
+    } catch (error) {
+      console.error("Failed to print risk brief", error);
+      if (printWindow && !printWindow.closed) {
+        printWindow.close();
+      }
+      window.alert(error.message || "Unable to open printable risk brief.");
+    } finally {
+      setButtonBusy(button, false, originalLabel || "Print brief");
+    }
+  }
+
   function attachRetryHandlers(loader) {
     qsa(".state-card .btn").forEach((button) => {
       button.addEventListener("click", loader);
@@ -489,14 +566,16 @@
 
   function bindActions() {
     const refreshButton = qs("[data-dashboard-refresh]");
+    const downloadButton = qs("[data-dashboard-report-download]");
+    const printButton = qs("[data-dashboard-report-print]");
     if (refreshButton) {
       refreshButton.addEventListener("click", loadDashboard);
     }
-    const exportButton = qs("[data-dashboard-export]");
-    if (exportButton) {
-      exportButton.addEventListener("click", () => {
-        window.alert("Export brief will be wired to backend report endpoints.");
-      });
+    if (downloadButton) {
+      downloadButton.addEventListener("click", downloadDailyRiskBrief);
+    }
+    if (printButton) {
+      printButton.addEventListener("click", printDailyRiskBrief);
     }
   }
 

@@ -200,6 +200,98 @@
     }
   }
 
+  function setButtonBusy(button, busy, label) {
+    if (!button) {
+      return;
+    }
+    button.disabled = busy;
+    if (label) {
+      button.textContent = label;
+    }
+  }
+
+  function activeScenarioId() {
+    return state.selectedScenarioId || state.scenarios[0]?.scenario?.id || state.scenarios[0]?.id || null;
+  }
+
+  async function fetchScenarioReport(scenarioId) {
+    return API.postJson(`/reports/scenario-summary/${scenarioId}`, null);
+  }
+
+  function reportFileName(report, scenarioId) {
+    const datePart = report?.generated_at ? new Date(report.generated_at).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+    const titlePart = window.EnergyReports ? window.EnergyReports.sanitizeFileName(report?.title || `scenario-${scenarioId}`) : `scenario-${scenarioId}`;
+    return `${titlePart}-${datePart}.json`;
+  }
+
+  async function downloadScenarioReport() {
+    const scenarioId = activeScenarioId();
+    if (!scenarioId) {
+      window.alert("Select or save a scenario first.");
+      return;
+    }
+    const button = qs("[data-scenario-report-download]");
+    const originalLabel = button ? button.textContent : "";
+    try {
+      setButtonBusy(button, true, "Downloading...");
+      const report = await fetchScenarioReport(scenarioId);
+      if (window.EnergyReports) {
+        window.EnergyReports.downloadJsonReport(reportFileName(report, scenarioId), report);
+      }
+    } catch (error) {
+      console.error("Failed to download scenario report", error);
+      window.alert(error.message || "Unable to download scenario report.");
+    } finally {
+      setButtonBusy(button, false, originalLabel || "Download JSON");
+    }
+  }
+
+  async function printScenarioReport() {
+    const scenarioId = activeScenarioId();
+    if (!scenarioId) {
+      window.alert("Select or save a scenario first.");
+      return;
+    }
+    const button = qs("[data-scenario-report-print]");
+    const originalLabel = button ? button.textContent : "";
+    let printWindow = null;
+    try {
+      setButtonBusy(button, true, "Preparing...");
+      printWindow = window.EnergyReports
+        ? window.EnergyReports.openPrintWindow({
+            title: "Scenario Summary",
+            loadingMessage: "Loading scenario summary...",
+          })
+        : window.open("", "_blank", "noopener,noreferrer");
+      if (!printWindow) {
+        throw new Error("Popup blocked. Please allow popups for printable reports.");
+      }
+      const report = await fetchScenarioReport(scenarioId);
+      if (window.EnergyReports) {
+        window.EnergyReports.renderPrintWindow(printWindow, report, {
+          title: report.title || "Scenario Summary",
+          subtitle: "Printable disruption simulation summary",
+        });
+      }
+      window.setTimeout(() => {
+        try {
+          printWindow.focus();
+          printWindow.print();
+        } catch (error) {
+          console.warn("Print dialog unavailable", error);
+        }
+      }, 250);
+    } catch (error) {
+      console.error("Failed to print scenario report", error);
+      if (printWindow && !printWindow.closed) {
+        printWindow.close();
+      }
+      window.alert(error.message || "Unable to open printable scenario report.");
+    } finally {
+      setButtonBusy(button, false, originalLabel || "Print summary");
+    }
+  }
+
   async function loadScenarios(preserveSelection = true) {
     setLoading("#scenario-list", "Loading scenarios...");
     try {
@@ -276,12 +368,20 @@
   function bindActions() {
     const createButton = qs("[data-scenario-create]");
     const refreshButton = qs("[data-scenario-refresh]");
+    const downloadButton = qs("[data-scenario-report-download]");
+    const printButton = qs("[data-scenario-report-print]");
     const form = qs("#scenario-form");
     if (createButton) {
       createButton.addEventListener("click", createScenario);
     }
     if (refreshButton) {
       refreshButton.addEventListener("click", () => loadScenarios(false));
+    }
+    if (downloadButton) {
+      downloadButton.addEventListener("click", downloadScenarioReport);
+    }
+    if (printButton) {
+      printButton.addEventListener("click", printScenarioReport);
     }
     if (form) {
       form.addEventListener("submit", createScenario);
@@ -293,4 +393,3 @@
     loadScenarios(false);
   });
 })(window, document);
-
