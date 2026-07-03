@@ -1,11 +1,42 @@
 from functools import lru_cache
 from typing import Any
 
-from pydantic import BaseSettings, Field, validator
+try:  # Pydantic v2
+    from pydantic import Field, field_validator
+    from pydantic_settings import BaseSettings, SettingsConfigDict
+    PYDANTIC_V2 = True
+except ImportError:  # Pydantic v1 fallback for local/dev environments
+    from pydantic import BaseSettings, Field, validator
+
+    PYDANTIC_V2 = False
+
+    def field_validator(*fields: str, mode: str = "after", **kwargs: Any):
+        """Compat shim that maps the Pydantic v2 decorator to v1's validator."""
+
+        pre = mode == "before"
+
+        def decorator(func):
+            return validator(*fields, pre=pre, allow_reuse=True, **kwargs)(func)
+
+        return decorator
 
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables and .env files."""
+
+    if PYDANTIC_V2:
+        model_config = SettingsConfigDict(
+            env_file=".env",
+            env_file_encoding="utf-8",
+            case_sensitive=False,
+            extra="ignore",
+        )
+    else:
+        class Config:
+            env_file = ".env"
+            env_file_encoding = "utf-8"
+            case_sensitive = False
+            extra = "ignore"
 
     app_name: str = Field(default="AI-Driven Energy Supply Chain Resilience")
     app_version: str = Field(default="0.1.0")
@@ -76,13 +107,7 @@ class Settings(BaseSettings):
     crudeprice_api_key: str = Field(default="")
     crudeprice_base_url: str = Field(default="https://www.crudepriceapi.com/api")
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = False
-        extra = "ignore"
-
-    @validator("cors_origins", pre=True)
+    @field_validator("cors_origins", mode="before")
     def parse_cors_origins(cls, value: Any) -> list[str]:
         """Allow comma-separated strings from environment variables."""
         if value is None:
@@ -94,7 +119,7 @@ class Settings(BaseSettings):
             return [item for item in raw_values if item]
         raise TypeError("cors_origins must be a list or comma-separated string")
 
-    @validator("enable_scheduler", pre=True)
+    @field_validator("enable_scheduler", mode="before")
     def parse_enable_scheduler(cls, value: Any) -> bool:
         if isinstance(value, bool):
             return value
@@ -104,7 +129,7 @@ class Settings(BaseSettings):
             return value.strip().lower() in {"1", "true", "yes", "on"}
         return bool(value)
 
-    @validator(
+    @field_validator(
         "debug",
         "demo_mode",
         "gdelt_enabled",
@@ -114,7 +139,7 @@ class Settings(BaseSettings):
         "uk_sanctions_enabled",
         "eu_sanctions_enabled",
         "un_sanctions_enabled",
-        pre=True,
+        mode="before",
     )
     def parse_flags(cls, value: Any) -> bool:
         if isinstance(value, bool):
